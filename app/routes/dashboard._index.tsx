@@ -1,9 +1,17 @@
 import { LoaderFunctionArgs, MetaFunction, json } from "@remix-run/node"
-import { useFetchers, useLoaderData, useMatches } from "@remix-run/react"
+import { Link, useFetchers, useLoaderData, useMatches } from "@remix-run/react"
+import { useState } from "react"
 import { BlockOfActions, ListOfActions } from "~/components/structure/Action"
 import CreateAction from "~/components/structure/CreateAction"
 import { ScrollArea } from "~/components/ui/ui/scroll-area"
-import { convertToAction, getLateActions, getTodayActions } from "~/lib/helpers"
+import { Toggle } from "~/components/ui/ui/toggle"
+import {
+  AvatarClient,
+  getLateActions,
+  getNotFinishedActions,
+  getOptimisticActions,
+  getTodayActions,
+} from "~/lib/helpers"
 import { SupabaseServerClient } from "~/lib/supabase"
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -25,36 +33,22 @@ export default function DashboardIndex() {
   let { actions } = useLoaderData<typeof loader>()
   const matches = useMatches()
   const fetchers = useFetchers()
+  const [allActions, setAllActions] = useState(false)
 
   const { categories, priorities, states, clients } = matches[1]
     .data as DashboardDataType
 
-  const optimisticActions = fetchers?.reduce<Action[]>((memo, fetcher) => {
-    if (fetcher.formData) {
-      const data = Object.fromEntries(fetcher.formData)
-
-      if (data.action === "action-update") {
-        const actionIndex = actions?.findIndex(
-          (action) => action.id === data.id
-        )
-
-        const action: Action = { ...actions![actionIndex!], ...data }
-        actions?.splice(actionIndex!, 1, action)
-      } else if (data.action === "action-create") {
-        memo.push(convertToAction(data))
-      }
-    }
-    return memo
-  }, [])
-
+  const optimisticActions = getOptimisticActions({ actions, fetchers })
   actions = [...actions!, ...optimisticActions]
 
   const lateActions = getLateActions({ actions })
-  const todayActions = getTodayActions({ actions })
+  const todayActions = getTodayActions({ actions, finished: allActions })
+  const notFinishedActions = getNotFinishedActions({ actions })
 
   return (
     <div className="container overflow-hidden">
-      <ScrollArea className="h-full w-full">
+      <ScrollArea className="h-full w-full px-4 md:px-8">
+        <div className="pt-16"></div>
         {lateActions?.length && (
           <div className="mb-8">
             <div className="flex justify-between py-2">
@@ -62,20 +56,17 @@ export default function DashboardIndex() {
                 Atrasados ({lateActions?.length})
               </h2>
             </div>
-            <div className="flex">
-              <ScrollArea className="max-h-[300px] w-full">
-                <ListOfActions
-                  categories={categories}
-                  priorities={priorities}
-                  states={states}
-                  actions={lateActions}
-                  showCategory={true}
-                  max={3}
-                  date={{ dateFormat: 1 }}
-                  clients={clients}
-                />
-              </ScrollArea>
-            </div>
+
+            <ListOfActions
+              categories={categories}
+              priorities={priorities}
+              states={states}
+              actions={lateActions}
+              showCategory={true}
+              max={3}
+              date={{ dateFormat: 1 }}
+              clients={clients}
+            />
           </div>
         )}
         {todayActions?.length ? (
@@ -84,18 +75,20 @@ export default function DashboardIndex() {
               <h2 className="text-xl font-semibold">
                 Hoje ({todayActions?.length})
               </h2>
+              <div>
+                <Toggle pressed={allActions} onPressedChange={setAllActions}>
+                  Mostrar Todas
+                </Toggle>
+              </div>
             </div>
-            <div className="flex">
-              <ScrollArea className="max-h-[300px] w-full">
-                <BlockOfActions
-                  categories={categories}
-                  priorities={priorities}
-                  states={states}
-                  actions={todayActions}
-                  clients={clients}
-                />
-              </ScrollArea>
-            </div>
+
+            <BlockOfActions
+              categories={categories}
+              priorities={priorities}
+              states={states}
+              actions={todayActions}
+              clients={clients}
+            />
           </div>
         ) : (
           <div className="grid place-content-center p-8 text-xl">
@@ -109,6 +102,36 @@ export default function DashboardIndex() {
             </div>
           </div>
         )}
+
+        <div className="mb-8">
+          <h2 className="mb-4 text-xl font-semibold">Clientes</h2>
+          <div className="flex flex-wrap justify-between gap-4">
+            {clients.map((client) => (
+              <Link to={`/dashboard/${client.slug}`} key={client.id}>
+                <AvatarClient client={client} size="lg" />
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <div className="flex justify-between py-2">
+            <h2 className="text-xl font-semibold">
+              Próximas Ações ({notFinishedActions?.length})
+            </h2>
+          </div>
+
+          <ListOfActions
+            categories={categories}
+            priorities={priorities}
+            states={states}
+            actions={notFinishedActions}
+            showCategory={true}
+            max={3}
+            date={{ dateFormat: 1 }}
+            clients={clients}
+          />
+        </div>
       </ScrollArea>
     </div>
   )

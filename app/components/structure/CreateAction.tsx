@@ -54,8 +54,6 @@ export default function CreateAction({
 
   const [action, setAction] = useState<RawAction>(cleanAction)
 
-  console.log({ action, cleanAction })
-
   const category = categories.find(
     (category) => category.id === action.category_id
   ) as Category
@@ -71,15 +69,9 @@ export default function CreateAction({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         {mode === "day" ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="grid h-5 w-5 place-content-center p-0"
-          >
-            <PlusIcon className="h-3 w-3" />
-            {/* <div>{date ? format(date, "d M y") : ""}</div>
-            <div>{action.date ? format(action.date, "d M y") : ""}</div> */}
-          </Button>
+          <div className="absolute inset-0 z-0 flex justify-end pt-4 md:pr-2 md:pt-2">
+            <PlusIcon className="h-4 w-4 text-gray-500" />
+          </div>
         ) : mode === "button" ? (
           <Button>
             Criar uma nova ação
@@ -95,7 +87,7 @@ export default function CreateAction({
           </Button>
         )}
       </PopoverTrigger>
-      <PopoverContent className="bg-content mr-[5dvw] w-[90dvw] sm:max-w-md md:px-6">
+      <PopoverContent className="bg-content w-[90dvw] sm:max-w-md md:px-6">
         {/* <pre className="text-xs">
 					{JSON.stringify(cleanAction.date, undefined, 2)}
 				</pre>
@@ -105,7 +97,6 @@ export default function CreateAction({
 
         {/* Título */}
         <div
-          tabIndex={-1}
           className="mb-1 w-full bg-transparent text-2xl font-medium outline-none placeholder:text-gray-500"
           onBlur={(e) =>
             setAction({
@@ -120,7 +111,6 @@ export default function CreateAction({
         ></div>
         {/* Descrição */}
         <div
-          tabIndex={-2}
           contentEditable="true"
           className="relative w-full bg-transparent py-2 text-sm  font-light outline-none"
           onBlur={(e) =>
@@ -147,7 +137,6 @@ export default function CreateAction({
               }}
             >
               <SelectTrigger
-                tabIndex={-3}
                 className={`border-none bg-transparent focus:ring-offset-0 ${
                   action.client_id ? "-ml-1 p-1 pl-2" : "px-2 py-1"
                 }`}
@@ -187,7 +176,6 @@ export default function CreateAction({
               }
             >
               <SelectTrigger
-                tabIndex={-4}
                 className={`border-none bg-transparent focus:ring-offset-0`}
               >
                 <Icons id={category.slug} className="w-4" />
@@ -218,7 +206,6 @@ export default function CreateAction({
               }
             >
               <SelectTrigger
-                tabIndex={-5}
                 className={`border-none bg-transparent focus:ring-offset-0`}
               >
                 <div
@@ -242,7 +229,6 @@ export default function CreateAction({
             <DropdownMenu>
               <DropdownMenuTrigger
                 asChild
-                tabIndex={-6}
                 className="rounded-lg border-none p-2 outline-none focus:ring-2 focus:ring-primary focus:ring-offset-0"
               >
                 <div className="flex pl-2">
@@ -295,7 +281,7 @@ export default function CreateAction({
           <div className="flex w-full items-center justify-between gap-2">
             {/* Data e Hora */}
             <Popover>
-              <PopoverTrigger asChild tabIndex={-7}>
+              <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -399,7 +385,6 @@ export default function CreateAction({
               </PopoverContent>
             </Popover>
             <Button
-              tabIndex={-8}
               variant={"default"}
               onClick={() => {
                 if (action.title.length === 0) {

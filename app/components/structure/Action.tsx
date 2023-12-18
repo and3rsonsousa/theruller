@@ -37,6 +37,7 @@ export function ActionLine({
   showCategory,
   client,
   date,
+  onDrag,
 }: {
   action: Action
   categories: Category[]
@@ -45,6 +46,7 @@ export function ActionLine({
   showCategory?: boolean
   client?: Client
   date?: { dateFormat?: 0 | 1 | 2 | 3 | 4; timeFormat?: 0 | 1 }
+  onDrag?: (action: Action) => void
 }) {
   const [edit, setEdit] = useState(false)
   const [isHover, setHover] = useState(false)
@@ -67,7 +69,7 @@ export function ActionLine({
       <ContextMenuTrigger>
         <div
           title={action.title}
-          className={`@[180px]:px-4 flex w-full cursor-pointer select-none items-center justify-between gap-2 overflow-hidden rounded border-l-4 px-2  py-1 text-xs font-medium transition ${
+          className={`@[180px]:px-4 flex w-full cursor-pointer select-none items-center justify-between gap-2 overflow-hidden rounded border-l-4 px-2  py-1 text-sm font-medium shadow transition md:text-xs ${
             edit
               ? "bg-gray-700"
               : "bg-gray-900 hover:bg-gray-800 hover:text-gray-200"
@@ -88,8 +90,12 @@ export function ActionLine({
             setHover(false)
           }}
           role="button"
-          tabIndex={-1}
+          tabIndex={0}
           onKeyDown={() => {}}
+          draggable={!!onDrag}
+          onDragEnd={() => {
+            if (onDrag) onDrag(action)
+          }}
         >
           {/* Atalhos */}
           {isHover && !edit && !edit ? (
@@ -106,15 +112,7 @@ export function ActionLine({
                 className="h-4 w-4 text-gray-600"
               />
             )}
-            {client && (
-              <AvatarClient size="xs" client={client} />
-              // <div className="w-12 shrink-0 overflow-hidden text-center text-[8px] font-semibold uppercase tracking-wider">
-              //   {
-              //     clients.find((client) => client.id === action.client_id)
-              //       ?.short
-              //   }
-              // </div>
-            )}
+            {client && <AvatarClient size="xs" client={client} />}
             <div className="relative w-full">
               <input
                 readOnly={!edit}
@@ -145,7 +143,7 @@ export function ActionLine({
           </div>
 
           {date && (
-            <div className="shrink grow-0 whitespace-nowrap text-right text-[10px] text-gray-500">
+            <div className="shrink grow-0 whitespace-nowrap text-right text-xs text-gray-500 md:text-[10px]">
               {formatActionDatetime({
                 date: action.date,
                 dateFormat: date.dateFormat,
@@ -203,7 +201,7 @@ export function ActionBlock({
           tabIndex={-1}
           onKeyDown={() => {}}
           title={action.title}
-          className={`flex cursor-pointer flex-col justify-between gap-2 overflow-hidden rounded border-l-4 px-4 py-2 text-sm transition border-${states.find(
+          className={`@container flex cursor-pointer flex-col justify-between gap-2 overflow-hidden rounded border-l-4 px-4 py-2 text-sm transition border-${states.find(
             (state) => state.id === Number(action.state_id)
           )?.slug} ${
             edit
@@ -275,12 +273,28 @@ export function ActionBlock({
                 </div>
               ) : null}
             </div>
-            <div className="whitespace-nowrap text-right text-xs">
-              {formatActionDatetime({
-                date: action.date,
-                dateFormat: 2,
-                timeFormat: 1,
-              })}
+            <div className="whitespace-nowrap text-right text-sm text-gray-500 md:text-xs">
+              <span className="@[200px]:hidden">
+                {formatActionDatetime({
+                  date: action.date,
+                  dateFormat: 2,
+                  timeFormat: 1,
+                })}
+              </span>
+              <span className="@[200px]:block @[300px]:hidden hidden">
+                {formatActionDatetime({
+                  date: action.date,
+                  dateFormat: 3,
+                  timeFormat: 1,
+                })}
+              </span>
+              <span className="@[300px]:block hidden">
+                {formatActionDatetime({
+                  date: action.date,
+                  dateFormat: 4,
+                  timeFormat: 1,
+                })}
+              </span>
             </div>
           </div>
         </div>
@@ -383,6 +397,7 @@ export function ListOfActions({
   showCategory,
   date,
   max,
+  onDrag,
 }: {
   actions?: Action[] | null
   categories: Category[]
@@ -392,14 +407,15 @@ export function ListOfActions({
   showCategory?: boolean
   date?: { dateFormat?: 0 | 1 | 2 | 3 | 4; timeFormat?: 0 | 1 }
   max?: 1 | 2 | 3
+  onDrag?: (action: Action) => void
 }) {
   return (
     <div
       className={`@container  min-h-full ${
         max === 2
-          ? "grid grid-cols-2"
+          ? "grid sm:grid-cols-2"
           : max === 3
-            ? "grid grid-cols-3"
+            ? "grid sm:grid-cols-2 md:grid-cols-3"
             : "flex flex-col"
       }  gap-x-4 gap-y-0.5`}
     >
@@ -417,6 +433,7 @@ export function ListOfActions({
               : undefined
           }
           date={date}
+          onDrag={onDrag}
         />
       ))}
     </div>
@@ -440,12 +457,8 @@ export function BlockOfActions({
 }) {
   return (
     <div
-      className={`grid h-full grid-cols-2 ${
-        !max
-          ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
-          : max === 2
-            ? "grid-cols-2"
-            : ""
+      className={`grid h-full ${
+        !max ? "sm:grid-cols-3 md:grid-cols-4" : max === 2 ? "grid-cols-2" : ""
       } gap-2`}
     >
       {actions?.map((action) => (

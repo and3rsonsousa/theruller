@@ -2,6 +2,7 @@ import { isAfter, isBefore, isToday, parseISO } from "date-fns"
 import {
   CircleDashedIcon,
   Code2Icon,
+  ComponentIcon,
   DollarSignIcon,
   ImageIcon,
   ListChecksIcon,
@@ -27,6 +28,7 @@ import {
   VIDEO_ID,
 } from "./constants"
 import { cn } from "./utils"
+import { Fetcher } from "@remix-run/react"
 
 export function ShortText({
   text,
@@ -132,7 +134,11 @@ export function getLateActions({
   )
 }
 
-export function getNotFinishedActions(actions: Action[] | null) {
+export function getNotFinishedActions({
+  actions,
+}: {
+  actions?: Action[] | null
+}) {
   return actions?.filter(
     (action) =>
       isAfter(parseISO(action.date), new Date()) &&
@@ -161,12 +167,17 @@ export function getTodayActions({
   )
 }
 
-export function getInstagramActions(actions: Action[] | null) {
+export function getInstagramActions({
+  actions,
+}: {
+  actions?: Action[] | null
+}) {
   return actions?.filter((action) =>
     [POST_ID, VIDEO_ID].includes(Number(action.category_id))
   )
 }
 const iconsList: { [key: string]: LucideIcon } = {
+  all: ComponentIcon,
   post: ImageIcon,
   video: PlayIcon,
   stories: CircleDashedIcon,
@@ -232,4 +243,36 @@ export function convertToAction(data: { [key: string]: unknown }): Action {
     user_id: String(data["user_id"]),
   }
   return action
+}
+
+export function getOptimisticActions({
+  actions,
+  fetchers,
+}: {
+  actions?: Action[] | null
+  fetchers: (Fetcher & { key: string })[]
+}): Action[] {
+  return fetchers?.reduce<Action[]>((memo, fetcher) => {
+    if (fetcher.formData) {
+      const data = Object.fromEntries(fetcher.formData)
+
+      if (data.action === "action-update") {
+        const actionIndex = actions?.findIndex(
+          (action) => action.id === data.id
+        )
+
+        const action: Action = { ...actions![actionIndex!], ...data }
+        actions?.splice(actionIndex!, 1, action)
+      } else if (data.action === "action-create") {
+        if (actions?.find((action) => action.id !== data.id))
+          memo.push(convertToAction(data))
+      } else if (data.action === "action-delete") {
+        const actionIndex = actions?.findIndex(
+          (action) => action.id === data.id
+        )
+        actions?.splice(actionIndex!, 1)
+      }
+    }
+    return memo
+  }, [])
 }

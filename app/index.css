@@ -190,3 +190,25 @@ html {
 .debug-5 {
   @apply border border-pink-500;
 }
+
+.scrollbars {
+  @apply h-full overflow-hidden overflow-y-auto pr-1;
+  scrollbars-gutter: stable;
+}
+
+.scrollbars::-webkit-scrollbar {
+  @apply mr-4 block w-2;
+}
+.scrollbars::-webkit-scrollbar-button {
+  @apply hidden;
+}
+
+.scrollbars::-webkit-scrollbar-track {
+  @apply mr-4 bg-transparent;
+}
+.scrollbars::-webkit-scrollbar-track-piece {
+  @apply mr-4 bg-transparent;
+}
+.scrollbars::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-gray-700 outline-black/10 backdrop-blur-lg;
+}

@@ -1,0 +1,68 @@
+import { LoaderFunctionArgs } from "@remix-run/node"
+import { useLoaderData, useMatches } from "@remix-run/react"
+import { useEffect } from "react"
+import { GridOfActions, ListOfActions } from "~/components/structure/Action"
+import { getInstagramActions } from "~/lib/helpers"
+import { SupabaseServerClient } from "~/lib/supabase"
+
+export const loader = async ({ request, params }: LoaderFunctionArgs) => {
+  const { supabase } = SupabaseServerClient({ request })
+
+  const { data: client } = await supabase
+    .from("clients")
+    .select("*")
+    .eq("slug", params["client"] as string)
+    .single()
+
+  const { data: actions } = await supabase
+    .from("actions")
+    .select("*")
+    .eq("client_id", client!.id)
+
+  return { actions, client }
+}
+
+export default function Actions() {
+  const matches = useMatches()
+  const { actions } = useLoaderData<typeof loader>() || {}
+  const { categories, priorities, states } = matches[1]
+    .data as DashboardDataType
+
+  console.log({ actions })
+
+  const instagramActions = getInstagramActions({ actions })
+
+  useEffect(() => {
+    console.log({ actions })
+  }, [actions])
+
+  return (
+    <div className="container flex gap-8">
+      <div className="w-1/2">
+        <div className="mb-8">
+          <div className="flex justify-between py-2">
+            <h2 className="text-xl font-semibold">
+              Ações para o Instagram ({instagramActions?.length})
+            </h2>
+          </div>
+
+          <ListOfActions
+            categories={categories}
+            priorities={priorities}
+            states={states}
+            actions={instagramActions}
+            showCategory
+          />
+        </div>
+      </div>
+      <div className="w-1/2">
+        <GridOfActions
+          categories={categories}
+          priorities={priorities}
+          states={states}
+          actions={instagramActions}
+        />
+      </div>
+    </div>
+  )
+}

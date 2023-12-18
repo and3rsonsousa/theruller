@@ -29,10 +29,10 @@ export default function Header() {
   const fetchers = useFetchers()
 
   return (
-    <header className="container fixed left-0 right-0 top-0 z-10 mx-auto flex h-16 flex-shrink-0 flex-grow items-center justify-between bg-background/25 px-4 backdrop-blur-2xl sm:px-8">
+    <header className="container fixed left-0 right-0 top-0 z-10 mx-auto flex h-16 flex-shrink-0 flex-grow items-center justify-between bg-background/25 px-4 backdrop-blur-xl md:px-8">
       <div className="flex items-center gap-2">
         <Link to="/dashboard" unstable_viewTransition>
-          <img src="/theruller.png" className="h-4 w-auto" alt="The Ruller" />
+          <img src="/theruller.png" className="w-28" alt="The Ruller" />
         </Link>
 
         {(navigation.state !== "idle" ||
@@ -48,7 +48,7 @@ export default function Header() {
               variant="ghost"
               className="flex items-center gap-2 text-xs font-semibold"
             >
-              <div>
+              <div className="w-32 overflow-hidden text-ellipsis text-right sm:w-auto">
                 {client
                   ? clients.find((c) => c.slug === client)?.title
                   : "Clientes"}
