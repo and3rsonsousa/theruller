@@ -111,7 +111,7 @@ export function sortActions(actions?: Action[] | null) {
     .sort((a, b) => Number(b.state_id) - Number(a.state_id))
 }
 
-export function getLateActions({
+export function getDelayedActions({
   actions,
   priority,
 }: {
@@ -124,14 +124,14 @@ export function getLateActions({
       ] as PRIORITIES)
     : undefined
 
-  return sortActions(
-    actions?.filter(
-      (action) =>
-        isBefore(parseISO(action.date), new Date()) &&
-        action.state_id !== FINISHED_ID &&
-        (priority ? action.priority_id === priority : true)
-    )
+  actions = actions?.filter(
+    (action) =>
+      isBefore(parseISO(action.date), new Date()) &&
+      Number(action.state_id) !== FINISHED_ID &&
+      (priority ? action.priority_id === priority : true)
   )
+
+  return actions
 }
 
 export function getNotFinishedActions({
@@ -172,10 +172,13 @@ export function getInstagramActions({
 }: {
   actions?: Action[] | null
 }) {
-  return actions?.filter((action) =>
-    [POST_ID, VIDEO_ID].includes(Number(action.category_id))
-  )
+  return actions
+    ?.filter((action) =>
+      [POST_ID, VIDEO_ID].includes(Number(action.category_id))
+    )
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 }
+
 const iconsList: { [key: string]: LucideIcon } = {
   all: ComponentIcon,
   post: ImageIcon,

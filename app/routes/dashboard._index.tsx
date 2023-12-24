@@ -7,10 +7,11 @@ import { ScrollArea } from "~/components/ui/ui/scroll-area"
 import { Toggle } from "~/components/ui/ui/toggle"
 import {
   AvatarClient,
-  getLateActions,
+  getDelayedActions,
   getNotFinishedActions,
   getOptimisticActions,
   getTodayActions,
+  sortActions,
 } from "~/lib/helpers"
 import { SupabaseServerClient } from "~/lib/supabase"
 
@@ -39,9 +40,9 @@ export default function DashboardIndex() {
     .data as DashboardDataType
 
   const optimisticActions = getOptimisticActions({ actions, fetchers })
-  actions = [...actions!, ...optimisticActions]
+  actions = sortActions([...actions!, ...optimisticActions]) as Action[]
 
-  const lateActions = getLateActions({ actions })
+  const lateActions = getDelayedActions({ actions })
   const todayActions = getTodayActions({ actions, finished: allActions })
   const notFinishedActions = getNotFinishedActions({ actions })
 
@@ -49,10 +50,10 @@ export default function DashboardIndex() {
     <div className="container overflow-hidden">
       <ScrollArea className="h-full w-full px-4 md:px-8">
         <div className="pt-16"></div>
-        {lateActions?.length && (
+        {lateActions?.length ? (
           <div className="mb-8">
             <div className="flex justify-between py-2">
-              <h2 className="text-xl font-semibold">
+              <h2 className="text-xl font-medium">
                 Atrasados ({lateActions?.length})
               </h2>
             </div>
@@ -68,11 +69,11 @@ export default function DashboardIndex() {
               clients={clients}
             />
           </div>
-        )}
+        ) : null}
         {todayActions?.length ? (
           <div className="mb-8">
             <div className="flex justify-between py-2">
-              <h2 className="text-xl font-semibold">
+              <h2 className="text-xl font-medium">
                 Hoje ({todayActions?.length})
               </h2>
               <div>
@@ -104,7 +105,7 @@ export default function DashboardIndex() {
         )}
 
         <div className="mb-8">
-          <h2 className="mb-4 text-xl font-semibold">Clientes</h2>
+          <h2 className="mb-4 text-xl font-medium">Clientes</h2>
           <div className="flex flex-wrap justify-between gap-4">
             {clients.map((client) => (
               <Link to={`/dashboard/${client.slug}`} key={client.id}>
@@ -116,7 +117,7 @@ export default function DashboardIndex() {
 
         <div className="mb-8">
           <div className="flex justify-between py-2">
-            <h2 className="text-xl font-semibold">
+            <h2 className="text-xl font-medium">
               Próximas Ações ({notFinishedActions?.length})
             </h2>
           </div>

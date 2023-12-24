@@ -1,9 +1,8 @@
 import { LoaderFunctionArgs } from "@remix-run/node"
 import { useLoaderData, useMatches } from "@remix-run/react"
-import { useEffect } from "react"
 import { BlockOfActions, ListOfActions } from "~/components/structure/Action"
 import {
-  getLateActions,
+  getDelayedActions,
   getNotFinishedActions,
   getTodayActions,
 } from "~/lib/helpers"
@@ -32,22 +31,16 @@ export default function Actions() {
   const { categories, priorities, states, clients } = matches[1]
     .data as DashboardDataType
 
-  console.log({ actions })
-
-  const lateActions = getLateActions({ actions })
+  const lateActions = getDelayedActions({ actions })
   const todayActions = getTodayActions({ actions })
   const notFinishedActions = getNotFinishedActions({ actions })
-
-  useEffect(() => {
-    console.log({ actions })
-  }, [actions])
 
   return (
     <div className="container overflow-hidden">
       {lateActions?.length ? (
         <div className="mb-8">
           <div className="flex justify-between py-2">
-            <h2 className="text-xl font-semibold">
+            <h2 className="text-xl font-medium">
               Atrasados ({lateActions?.length})
             </h2>
           </div>
@@ -67,9 +60,7 @@ export default function Actions() {
 
       <div className="mb-8">
         <div className="flex justify-between py-2">
-          <h2 className="text-xl font-semibold">
-            Hoje ({todayActions?.length})
-          </h2>
+          <h2 className="text-xl font-medium">Hoje ({todayActions?.length})</h2>
         </div>
 
         <BlockOfActions
@@ -82,7 +73,7 @@ export default function Actions() {
       </div>
       <div className="mb-8">
         <div className="flex justify-between py-2">
-          <h2 className="text-xl font-semibold">
+          <h2 className="text-xl font-medium">
             Próximas ações ({notFinishedActions?.length})
           </h2>
         </div>

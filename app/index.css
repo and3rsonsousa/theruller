@@ -1,14 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@font-face {
-  font-family: "Inter";
-  src: url("/inter.woff2") format("woff2");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
 
 @layer base {
   :root {
@@ -64,10 +58,6 @@
   body {
     @apply bg-background text-foreground;
   }
-}
-
-html {
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
 [contenteditable="true"]:empty:before {
@@ -168,11 +158,11 @@ html {
 }
 
 .bg-item {
-  @apply rounded-[10px] px-3 py-1 text-xs font-light;
+  @apply px-3 py-1 text-xs font-light;
 }
 
 .bg-select-item {
-  @apply py-1 pl-8 pr-4 text-xs font-light;
+  @apply px-3 py-1 pl-8 text-xs font-light;
 }
 
 .debug-1 {
@@ -211,4 +201,34 @@ html {
 }
 .scrollbars::-webkit-scrollbar-thumb {
   @apply rounded-full bg-gray-700 outline-black/10 backdrop-blur-lg;
+}
+
+.highlight {
+  box-shadow:
+    inset 0 1px 0px 0 #ffffff99,
+    inset 0 1px 4px 0 #ffffff44;
+}
+
+.highlight-soft {
+  box-shadow: inset 0 1px 1px 0 #99ccff22;
+}
+
+.no-highlight {
+  box-shadow: none;
+}
+.no-highlight:hover {
+  box-shadow:
+    inset 0 1px 0px 0 #ffffff99,
+    inset 0 1px 4px 0 #ffffff44;
+}
+
+.button-primary {
+  background-size: auto;
+  background-position: center top;
+  background-image: linear-gradient(
+    to bottom,
+    #9900ff 0%,
+    #0000ff66 35%,
+    #9900ff00 80%
+  );
 }

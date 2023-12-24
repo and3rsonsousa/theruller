@@ -3,7 +3,7 @@ import { useMatches, useSubmit } from "@remix-run/react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { PlusIcon } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { AvatarClient, Icons } from "~/lib/helpers"
 import { Avatar, AvatarImage } from "../ui/ui/avatar"
 import { Button } from "../ui/ui/button"
@@ -39,7 +39,12 @@ export default function CreateAction({
   const { toast } = useToast()
 
   const newDate = date || new Date()
-  newDate.setHours(11, 0)
+
+  if (new Date().getHours() > 11) {
+    newDate.setHours(new Date().getHours() + 1, new Date().getMinutes())
+  } else {
+    newDate.setHours(11, 0)
+  }
 
   const cleanAction = {
     category_id: 1,
@@ -65,11 +70,17 @@ export default function CreateAction({
     )
   )
 
+  useEffect(() => {
+    if (open) {
+      setAction(cleanAction)
+    }
+  }, [open])
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         {mode === "day" ? (
-          <div className="absolute inset-0 z-0 flex justify-end pt-4 md:pr-2 md:pt-2">
+          <div className="absolute inset-0 z-0 flex cursor-pointer justify-end pt-4 md:pr-2 md:pt-2">
             <PlusIcon className="h-4 w-4 text-gray-500" />
           </div>
         ) : mode === "button" ? (
@@ -108,6 +119,8 @@ export default function CreateAction({
           contentEditable="true"
           // suppressContentEditableWarning={true}
           dangerouslySetInnerHTML={{ __html: action.title }}
+          tabIndex={0}
+          role="textbox"
         ></div>
         {/* Descrição */}
         <div
@@ -188,7 +201,7 @@ export default function CreateAction({
                     className="bg-select-item"
                   >
                     <div className="flex items-center gap-2">
-                      <Icons id={category.slug} className="w-4" />
+                      <Icons id={category.slug} className="h-4 w-4" />
                       <span>{category.title}</span>
                     </div>
                   </SelectItem>
@@ -214,12 +227,16 @@ export default function CreateAction({
               </SelectTrigger>
               <SelectContent className="bg-content">
                 {states.map((state) => (
-                  <SelectItem value={state.id.toString()} key={state.id}>
+                  <SelectItem
+                    value={state.id.toString()}
+                    key={state.id}
+                    className="bg-select-item"
+                  >
                     <div className="flex items-center gap-2">
                       <div
                         className={`h-2 w-2 rounded-full border-2 border-${state.slug}`}
                       ></div>
-                      <div>{state.title}</div>
+                      <div className="text-xs">{state.title}</div>
                     </div>
                   </SelectItem>
                 ))}

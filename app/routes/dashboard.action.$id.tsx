@@ -5,6 +5,7 @@ import { format, formatDistanceToNow, parseISO } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { CalendarDaysIcon, CalendarIcon, ListTodoIcon } from "lucide-react"
 import { useState } from "react"
+import { SpectrumButton } from "~/components/ui/spectrum/Spectrum"
 import { Avatar, AvatarImage } from "~/components/ui/ui/avatar"
 import { Button } from "~/components/ui/ui/button"
 import { Calendar } from "~/components/ui/ui/calendar"
@@ -141,7 +142,8 @@ export default function ActionPage() {
           </Button>
         </div>
       </div>
-      <div className="flex shrink grow flex-col gap-4 overflow-hidden px-4 text-gray-400">
+
+      <div className="flex shrink grow flex-col gap-4 overflow-hidden px-4 text-gray-300">
         {/* Título */}
         <div
           contentEditable="true"
@@ -154,13 +156,12 @@ export default function ActionPage() {
               title: e.currentTarget.innerText,
             })
           }
-          className="bg-transparent  text-5xl font-semibold tracking-tight outline-none transition focus:text-gray-100 "
+          className="bg-transparent  text-5xl font-semibold tracking-tighter outline-none transition "
         />
         {/* Descrição */}
-        <div className="group flex shrink grow flex-col overflow-hidden">
-          <div className="mb-2 flex items-center gap-4 text-xs font-semibold uppercase tracking-wider">
+        <div className="flex shrink grow flex-col overflow-hidden">
+          <div className="mb-2 flex items-center gap-4 text-xs font-medium uppercase tracking-wider">
             <div>Descrição</div>
-            <hr className="w-full border-gray-300/20 opacity-0 group-focus-within:opacity-100 " />
           </div>
           <div
             id="description"
@@ -174,7 +175,7 @@ export default function ActionPage() {
                 description: e.currentTarget.innerHTML,
               })
             }
-            className="scrollbars shrink grow bg-transparent text-xl font-normal leading-normal outline-none transition focus:text-gray-100"
+            className="scrollbars shrink grow bg-transparent text-xl font-normal leading-normal outline-none transition"
           />
         </div>
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
@@ -183,7 +184,7 @@ export default function ActionPage() {
             <DropdownMenu>
               <DropdownMenuTrigger className="-ml-2 flex h-auto w-auto items-center gap-4 rounded-xl border-none p-2 outline-none ring-primary focus:ring-2 focus:ring-offset-0">
                 <AvatarClient client={client} size="lg" />
-                {/* <span className="font-semibold">
+                {/* <span className="font-medium">
 									{client.title}
 								</span> */}
               </DropdownMenuTrigger>
@@ -222,7 +223,7 @@ export default function ActionPage() {
                 <div className="grid h-12 w-12 place-content-center rounded-full bg-gray-900">
                   <Icons id={category.slug} />
                 </div>
-                {/* <span className="font-semibold">
+                {/* <span className="font-medium">
 									{category.title}
 								</span> */}
               </DropdownMenuTrigger>
@@ -255,7 +256,7 @@ export default function ActionPage() {
                     className={`h-6 w-6 rounded-full border-4 border-${state.slug}`}
                   ></div>
                 </div>
-                {/* <span className="font-semibold">
+                {/* <span className="font-medium">
 									{state.title}
 								</span> */}
               </DropdownMenuTrigger>
@@ -288,7 +289,7 @@ export default function ActionPage() {
                 <div className="grid h-12 w-12 place-content-center rounded-full bg-gray-900">
                   <Icons id={priority.slug} type="priority" />
                 </div>
-                {/* <span className="font-semibold">
+                {/* <span className="font-medium">
 									{priority.title}
 								</span> */}
               </DropdownMenuTrigger>
@@ -376,7 +377,7 @@ export default function ActionPage() {
                   size="sm"
                   className="-ml-3 flex items-center gap-2 font-normal focus-visible:ring-offset-0"
                 >
-                  <CalendarIcon className="h-4 w-4" />
+                  <CalendarIcon className="size-4" />
                   <span>
                     {format(
                       date,
@@ -465,10 +466,10 @@ export default function ActionPage() {
               </PopoverContent>
             </Popover>
           </div>
+
           <div>
-            <Button
-              variant="default"
-              onClick={(e) => {
+            <SpectrumButton
+              onPress={(e) => {
                 console.log(e.shiftKey)
 
                 handleActions({
@@ -479,7 +480,7 @@ export default function ActionPage() {
               }}
             >
               Atualizar
-            </Button>
+            </SpectrumButton>
           </div>
         </div>
       </div>

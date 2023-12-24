@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs, MetaFunction, json } from "@remix-run/node"
+import { LoaderFunctionArgs, json } from "@remix-run/node"
 import {
   Link,
   useFetchers,
@@ -63,14 +63,6 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     )
 
   return json({ actions, client }, { headers })
-}
-
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return [
-    {
-      title: data?.client?.title,
-    },
-  ]
 }
 
 export default function Client() {
@@ -188,7 +180,7 @@ export default function Client() {
               <Button
                 size={"sm"}
                 variant={"ghost"}
-                className={`bg-${stateFilter?.slug} text-xs font-bold`}
+                className={`bg-${stateFilter?.slug} text-xs font-semibold`}
               >
                 {stateFilter ? stateFilter.title : "Filtre pelo Status"}
               </Button>
@@ -231,7 +223,7 @@ export default function Client() {
               <Button
                 size={"sm"}
                 variant={"ghost"}
-                className={`text-xs font-bold`}
+                className={`text-xs font-semibold`}
               >
                 {categoryFilter ? (
                   <>
@@ -276,7 +268,7 @@ export default function Client() {
         </div>
       </div>
       <div
-        className="container z-10 hidden h-8 grid-cols-7 bg-background/25 px-0 py-2 text-center text-xs font-semibold uppercase tracking-wide backdrop-blur-lg md:grid"
+        className="container z-10 hidden h-8 grid-cols-7 bg-background/25 px-0 py-2 text-center text-xs font-medium uppercase tracking-wide backdrop-blur-lg md:grid"
         id="daysheader"
       >
         {eachDayOfInterval({
@@ -300,7 +292,7 @@ export default function Client() {
           <div
             className={`${
               !isSameMonth(day.date, currentDate) ? "hidden md:block" : ""
-            } group relative cursor-pointer border-t bg-gradient-to-b py-2 transition hover:from-gray-900/50 hover:via-transparent md:px-1 md:pt-0`}
+            } group/day relative border-t bg-gradient-to-b py-2 transition hover:from-gray-900 hover:via-transparent md:px-1 md:pt-0`}
             key={i}
             data-date={format(day.date, "yyyy-MM-dd")}
             onDragOver={(e) => {
@@ -312,20 +304,20 @@ export default function Client() {
               e.currentTarget.classList.add("dragover")
             }}
           >
-            <div className="absolute -top-[1px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-gray-500 opacity-0 transition group-hover:opacity-100"></div>
+            <div className="absolute -top-[1px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-gray-500 opacity-0 transition group-hover/day:opacity-100"></div>
             <div className="my-1 flex justify-between">
               <div
                 className={`grid h-6 w-6 place-content-center rounded-full text-xs ${
                   isToday(day.date) ? "bg-primary" : "-ml-1"
                 } ${
                   isSameMonth(day.date, currentDate)
-                    ? "font-semibold"
+                    ? "font-medium"
                     : "text-gray-700"
                 }`}
               >
                 {day.date.getDate()}
               </div>
-              <div className="transition group-hover:opacity-100 md:opacity-0">
+              <div className="transition group-hover/day:opacity-100 md:opacity-0">
                 <CreateAction
                   mode="day"
                   date={day.date}

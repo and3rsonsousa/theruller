@@ -18,7 +18,6 @@ module.exports = {
       },
     },
     fontFamily: {
-      compasso: ["Compasso", "sans-serif"],
       inter: ["Inter", "sans-serif"],
     },
     extend: {
@@ -99,5 +98,6 @@ module.exports = {
   plugins: [
     require("tailwindcss-animate"),
     require("@tailwindcss/container-queries"),
+    require("tailwindcss-react-aria-components"),
   ],
 }

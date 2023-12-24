@@ -46,7 +46,7 @@ export default function Header() {
             <Button
               size="sm"
               variant="ghost"
-              className="flex items-center gap-2 text-xs font-semibold"
+              className="flex items-center gap-2 text-xs font-medium"
             >
               <div className="w-32 overflow-hidden text-ellipsis text-right sm:w-auto">
                 {client

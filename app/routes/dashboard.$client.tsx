@@ -48,7 +48,7 @@ export default function Client() {
             className="flex items-center gap-4 "
           >
             <AvatarClient client={client} size="lg" />
-            <div className="text-2xl font-bold tracking-tight">
+            <div className="text-2xl font-medium tracking-tight">
               {client?.title}
             </div>
           </Link>
@@ -57,7 +57,7 @@ export default function Client() {
               asChild
               size="sm"
               variant="ghost"
-              className="flex gap-2 font-semibold"
+              className="flex gap-2 font-medium"
             >
               <Link to={`/dashboard/${client?.slug}/`}>
                 <CalendarDaysIcon className="h-4 w-4" />
@@ -68,7 +68,7 @@ export default function Client() {
               asChild
               size="sm"
               variant="ghost"
-              className="flex gap-2 font-semibold"
+              className="flex gap-2 font-medium"
             >
               <Link to={`/dashboard/${client?.slug}/instagram`}>
                 <Grid3X3Icon className="h-4 w-4" />
@@ -79,7 +79,7 @@ export default function Client() {
               asChild
               size="sm"
               variant="ghost"
-              className="flex gap-2 font-semibold"
+              className="flex gap-2 font-medium"
             >
               <Link to={`/dashboard/${client?.slug}/actions`}>
                 <ListTodoIcon className="h-4 w-4" />

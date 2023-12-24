@@ -69,7 +69,7 @@ export function ActionLine({
       <ContextMenuTrigger>
         <div
           title={action.title}
-          className={`@[180px]:px-4 flex w-full cursor-pointer select-none items-center justify-between gap-2 overflow-hidden rounded border-l-4 px-2  py-1 text-sm font-medium shadow transition md:text-xs ${
+          className={`highlight-soft group/action relative flex w-full cursor-pointer select-none items-center justify-between gap-2 overflow-hidden rounded border-l-4 px-2 py-1  text-sm font-medium shadow transition @[180px]:px-4 md:text-xs ${
             edit
               ? "bg-gray-700"
               : "bg-gray-900 hover:bg-gray-800 hover:text-gray-200"
@@ -151,6 +151,7 @@ export function ActionLine({
               })}
             </div>
           )}
+          <div className="absolute left-0 right-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-gray-500 opacity-0 transition group-hover/action:opacity-100"></div>
         </div>
       </ContextMenuTrigger>
       <ContextMenuItems
@@ -201,12 +202,12 @@ export function ActionBlock({
           tabIndex={-1}
           onKeyDown={() => {}}
           title={action.title}
-          className={`@container flex cursor-pointer flex-col justify-between gap-2 overflow-hidden rounded border-l-4 px-4 py-2 text-sm transition border-${states.find(
+          className={`highlight-soft group/action flex cursor-pointer flex-col justify-between gap-2 overflow-hidden rounded border-l-4 px-4 py-2 text-sm transition @container border-${states.find(
             (state) => state.id === Number(action.state_id)
           )?.slug} ${
             edit
               ? "bg-gray-700 text-gray-100"
-              : "bg-gray-900 hover:bg-gray-800 hover:text-gray-200"
+              : "border-white/20 bg-gray-900 from-white/10 via-transparent hover:bg-gradient-to-b hover:text-gray-200"
           }`}
           onMouseEnter={() => {
             setHover(true)
@@ -281,14 +282,14 @@ export function ActionBlock({
                   timeFormat: 1,
                 })}
               </span>
-              <span className="@[200px]:block @[300px]:hidden hidden">
+              <span className="hidden @[200px]:block @[300px]:hidden">
                 {formatActionDatetime({
                   date: action.date,
                   dateFormat: 3,
                   timeFormat: 1,
                 })}
               </span>
-              <span className="@[300px]:block hidden">
+              <span className="hidden @[300px]:block">
                 {formatActionDatetime({
                   date: action.date,
                   dateFormat: 4,
@@ -297,6 +298,7 @@ export function ActionBlock({
               </span>
             </div>
           </div>
+          <div className="absolute left-0 right-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-gray-400 opacity-0 transition group-hover/action:opacity-100"></div>
         </div>
       </ContextMenuTrigger>
       <ContextMenuItems
@@ -339,9 +341,9 @@ export function ActionGrid({
     <ContextMenu>
       <ContextMenuTrigger>
         <div
-          className={`flex aspect-square select-none flex-col items-center justify-between rounded-xl p-4 ${
+          className={`group/action highlight-soft relative flex aspect-square select-none flex-col items-center justify-between rounded-xl from-white/5  p-4 hover:bg-gradient-to-b ${
             action.state_id === FINISHED_ID
-              ? "bg-gray-900 text-gray-500"
+              ? "bg-gray-900/50 text-gray-500"
               : "bg-gray-800"
           }`}
           onMouseEnter={() => setHover(true)}
@@ -352,10 +354,10 @@ export function ActionGrid({
           ) : null}
           <div></div>
           <div
-            className={`line-clamp-4 py-4 text-center font-medium ${
+            className={`line-clamp-4 py-4 text-center font-medium transition group-hover/action:text-gray-300 ${
               action.title.length > 30
                 ? "text-sm leading-tight"
-                : action.title.length > 18
+                : action.title.length > 18 || action.title.indexOf(" ") === -1
                   ? "text-lg leading-[1.15] tracking-tight"
                   : "text-2xl leading-none tracking-tight"
             }`}
@@ -375,6 +377,7 @@ export function ActionGrid({
               })}
             </div>
           </div>
+          <div className="absolute left-0 right-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-gray-400 opacity-0 transition group-hover/action:opacity-100"></div>
         </div>
       </ContextMenuTrigger>
       <ContextMenuItems
@@ -411,13 +414,13 @@ export function ListOfActions({
 }) {
   return (
     <div
-      className={`@container  min-h-full ${
+      className={`min-h-full  @container ${
         max === 2
           ? "grid sm:grid-cols-2"
           : max === 3
             ? "grid sm:grid-cols-2 md:grid-cols-3"
             : "flex flex-col"
-      }  gap-x-4 gap-y-0.5`}
+      }  gap-x-4 gap-y-1`}
     >
       {actions?.map((action) => (
         <ActionLine
@@ -492,7 +495,7 @@ export function GridOfActions({
 }) {
   return (
     <div className="scrollbars">
-      <div className="grid h-full grid-cols-3 place-content-start gap-2">
+      <div className="grid h-full grid-cols-3 place-content-start gap-1">
         {actions?.map((action) => (
           <ActionGrid
             action={action}
@@ -545,12 +548,9 @@ function ShortcutActions({
           id: action.id,
           state_id,
         })
-      }
-
-      if (key === "e") {
+      } else if (key === "e") {
         navigate(`/dashboard/action/${action.id}`)
-      }
-      if (key === "d") {
+      } else if (key === "d") {
         handleActions({
           id: action.id,
           newId: window.crypto.randomUUID(),
@@ -558,31 +558,35 @@ function ShortcutActions({
           updated_at: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
           action: "action-duplicate",
         })
-      }
-
-      if (key === "x") {
+      } else if (key === "x") {
         handleActions({ id: action.id, action: "action-delete" })
-      }
-
-      if (key === "1") {
+      } else if (key === "1") {
         handleActions({
           id: action.id,
           action: "action-update",
           priority_id: PRIORITY_LOW,
         })
-      }
-      if (key === "2") {
+      } else if (key === "2") {
         handleActions({
           id: action.id,
           action: "action-update",
           priority_id: PRIORITY_MEDIUM,
         })
-      }
-      if (key === "3") {
+      } else if (key === "3") {
         handleActions({
           id: action.id,
           action: "action-update",
           priority_id: PRIORITY_HIGH,
+        })
+      } else if (key === "h") {
+        const date = parseISO(action.date)
+        date.setDate(new Date().getDate())
+        date.setHours(new Date().getHours() + 1)
+
+        handleActions({
+          id: action.id,
+          action: "action-update",
+          date: format(date, "yyyy-MM-dd HH:mm:ss"),
         })
       }
     }

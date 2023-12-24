@@ -1,7 +1,7 @@
 import type { MetaFunction } from "@remix-run/node"
-import { Link } from "@remix-run/react"
+
 import { LogInIcon } from "lucide-react"
-import { Button } from "~/components/ui/ui/button"
+import { SpectrumLink } from "~/components/ui/spectrum/Spectrum"
 
 export const meta: MetaFunction = () => {
   return [
@@ -12,15 +12,13 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   return (
-    <div className="grid h-[100dvh] place-content-center text-center">
-      <img src="/theruller.png" alt="The Ruller App" className="w-48" />
+    <div className="grid h-dvh place-content-center text-center">
+      <img src="/theruller.png" alt="The Ruller App" className="mb-4 w-44" />
       <div className="p-4">
-        <Button asChild>
-          <Link to={`/dashboard`}>
-            Entrar
-            <LogInIcon className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
+        <SpectrumLink href={`/dashboard`}>
+          <span>Entrar</span>
+          <LogInIcon className="size-4" />
+        </SpectrumLink>
       </div>
     </div>
   )
