@@ -134,13 +134,13 @@ export default function Client() {
         const header = document.querySelector("#daysheader")
         const calendar = document.querySelector("#calendar")
         const divider = document.querySelector("#divider")
-        if ((e as React.UIEvent<HTMLElement>).currentTarget.scrollTop > 100) {
+        if ((e as React.UIEvent<HTMLElement>).currentTarget.scrollTop > 60) {
           header?.classList.add("fixed", "top-[64px]", "-ml-8", "px-9")
-          calendar?.classList.add("mt-8")
+          calendar?.classList.add("mt-20")
           divider?.classList.remove("hidden")
         } else {
           header?.classList.remove("fixed", "-ml-8", "px-9")
-          calendar?.classList.remove("mt-8")
+          calendar?.classList.remove("mt-20")
           divider?.classList.add("hidden")
         }
       })
@@ -148,135 +148,140 @@ export default function Client() {
 
   return (
     <div className="container relative flex flex-col overflow-hidden">
-      <div className="flex items-center justify-between py-2">
-        <div className="flex items-center gap-1 text-xl font-semibold capitalize">
-          <div className="mr-4">
-            {format(currentDate, "MMMM", { locale: ptBR })}
+      <div
+        id="daysheader"
+        className="container z-10 bg-background/25 backdrop-blur-lg"
+      >
+        <div className="flex items-center justify-between py-2">
+          <div className="flex items-center gap-1 text-xl font-semibold capitalize">
+            <div className="mr-4">
+              {format(currentDate, "MMMM", { locale: ptBR })}
+            </div>
+            <Button size="icon" variant="ghost" asChild>
+              <Link
+                to={`/dashboard/${client?.slug}?date=${format(
+                  subMonths(currentDate, 1),
+                  "yyyy-MM-dd"
+                )}`}
+              >
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button size="icon" variant="ghost" asChild>
+              <Link
+                to={`/dashboard/${client?.slug}?date=${format(
+                  addMonths(currentDate, 1),
+                  "yyyy-MM-dd"
+                )}`}
+              >
+                <ChevronRightIcon className="h-4 w-4" />
+              </Link>
+            </Button>
           </div>
-          <Button size="icon" variant="ghost" asChild>
-            <Link
-              to={`/dashboard/${client?.slug}?date=${format(
-                subMonths(currentDate, 1),
-                "yyyy-MM-dd"
-              )}`}
-            >
-              <ChevronLeftIcon className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button size="icon" variant="ghost" asChild>
-            <Link
-              to={`/dashboard/${client?.slug}?date=${format(
-                addMonths(currentDate, 1),
-                "yyyy-MM-dd"
-              )}`}
-            >
-              <ChevronRightIcon className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size={"sm"}
-                variant={"ghost"}
-                className={`bg-${stateFilter?.slug} text-xs font-semibold`}
-              >
-                {stateFilter ? stateFilter.title : "Filtre pelo Status"}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-content">
-              <DropdownMenuCheckboxItem
-                className="bg-select-item flex gap-2"
-                onCheckedChange={() => {
-                  setStateFilter(undefined)
-                }}
-              >
-                <div
-                  className={`h-3 w-3 rounded-full border-2 border-white`}
-                ></div>
-                <div>Todos os Status</div>
-              </DropdownMenuCheckboxItem>
-              {states.map((state) => (
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size={"sm"}
+                  variant={"ghost"}
+                  className={`bg-${stateFilter?.slug} text-xs font-semibold`}
+                >
+                  {stateFilter ? stateFilter.title : "Filtre pelo Status"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-content">
                 <DropdownMenuCheckboxItem
                   className="bg-select-item flex gap-2"
-                  key={state.id}
-                  checked={state.id === stateFilter?.id}
-                  onCheckedChange={(checked) => {
-                    if (!checked && state.id === stateFilter?.id) {
-                      setStateFilter(undefined)
-                    } else {
-                      setStateFilter(state)
-                    }
+                  onCheckedChange={() => {
+                    setStateFilter(undefined)
                   }}
                 >
                   <div
-                    className={`h-3 w-3 rounded-full border-2 border-${state.slug}`}
+                    className={`h-3 w-3 rounded-full border-2 border-white`}
                   ></div>
-                  <div>{state.title}</div>
+                  <div>Todos os Status</div>
                 </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size={"sm"}
-                variant={"ghost"}
-                className={`text-xs font-semibold`}
-              >
-                {categoryFilter ? (
-                  <>
-                    <Icons id={categoryFilter.slug} className="mr-1 h-4 w-4" />
-                    <div>{categoryFilter.title}</div>
-                  </>
-                ) : (
-                  "Filtre pela Categoria"
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-content">
-              <DropdownMenuCheckboxItem
-                className="bg-select-item flex gap-2"
-                checked={categoryFilter === undefined}
-                onCheckedChange={() => {
-                  setCategoryFilter(undefined)
-                }}
-              >
-                <Icons className="h-3 w-3" id="all" />
-                <div>Todas as Categorias</div>
-              </DropdownMenuCheckboxItem>
-              {categories.map((category) => (
+                {states.map((state) => (
+                  <DropdownMenuCheckboxItem
+                    className="bg-select-item flex gap-2"
+                    key={state.id}
+                    checked={state.id === stateFilter?.id}
+                    onCheckedChange={(checked) => {
+                      if (!checked && state.id === stateFilter?.id) {
+                        setStateFilter(undefined)
+                      } else {
+                        setStateFilter(state)
+                      }
+                    }}
+                  >
+                    <div
+                      className={`h-3 w-3 rounded-full border-2 border-${state.slug}`}
+                    ></div>
+                    <div>{state.title}</div>
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size={"sm"}
+                  variant={"ghost"}
+                  className={`text-xs font-semibold`}
+                >
+                  {categoryFilter ? (
+                    <>
+                      <Icons
+                        id={categoryFilter.slug}
+                        className="mr-1 h-4 w-4"
+                      />
+                      <div>{categoryFilter.title}</div>
+                    </>
+                  ) : (
+                    "Filtre pela Categoria"
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-content">
                 <DropdownMenuCheckboxItem
                   className="bg-select-item flex gap-2"
-                  key={category.id}
-                  checked={category.id === categoryFilter?.id}
-                  onCheckedChange={(checked) => {
-                    if (!checked && category.id === categoryFilter?.id) {
-                      setCategoryFilter(undefined)
-                    } else {
-                      setCategoryFilter(category)
-                    }
+                  checked={categoryFilter === undefined}
+                  onCheckedChange={() => {
+                    setCategoryFilter(undefined)
                   }}
                 >
-                  <Icons id={category.slug} className="h-3 w-3" />
-                  <div>{category.title}</div>
+                  <Icons className="h-3 w-3" id="all" />
+                  <div>Todas as Categorias</div>
                 </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                {categories.map((category) => (
+                  <DropdownMenuCheckboxItem
+                    className="bg-select-item flex gap-2"
+                    key={category.id}
+                    checked={category.id === categoryFilter?.id}
+                    onCheckedChange={(checked) => {
+                      if (!checked && category.id === categoryFilter?.id) {
+                        setCategoryFilter(undefined)
+                      } else {
+                        setCategoryFilter(category)
+                      }
+                    }}
+                  >
+                    <Icons id={category.slug} className="h-3 w-3" />
+                    <div>{category.title}</div>
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-      </div>
-      <div
-        className="container z-10 hidden h-8 grid-cols-7 bg-background/25 px-0 py-2 text-center text-xs font-medium uppercase tracking-wide backdrop-blur-lg md:grid"
-        id="daysheader"
-      >
-        {eachDayOfInterval({
-          start: startOfWeek(new Date()),
-          end: endOfWeek(new Date()),
-        }).map((day, j) => {
-          return <div key={j}>{format(day, "EEE", { locale: ptBR })}</div>
-        })}
+        <div className="hidden grid-cols-7  px-0 pb-2 text-center text-xs font-medium uppercase tracking-wide  md:grid">
+          {eachDayOfInterval({
+            start: startOfWeek(new Date()),
+            end: endOfWeek(new Date()),
+          }).map((day, j) => {
+            return <div key={j}>{format(day, "EEE", { locale: ptBR })}</div>
+          })}
+        </div>
         <div
           id="divider"
           className="absolute bottom-0 hidden h-[1px] w-full bg-gradient-to-r  from-transparent via-gray-700"
@@ -304,7 +309,7 @@ export default function Client() {
               e.currentTarget.classList.add("dragover")
             }}
           >
-            <div className="absolute -top-[1px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-gray-500 opacity-0 transition group-hover/day:opacity-100"></div>
+            <div className="absolute -top-[1px] left-0 right-0 mt-24 h-[1px] bg-gradient-to-r from-transparent via-gray-500 opacity-0 transition group-hover/day:opacity-100"></div>
             <div className="my-1 flex justify-between">
               <div
                 className={`grid h-6 w-6 place-content-center rounded-full text-xs ${

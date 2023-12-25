@@ -107,8 +107,10 @@ export function AvatarClient({
 
 export function sortActions(actions?: Action[] | null) {
   return actions
-    ?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .sort((a, b) => Number(b.state_id) - Number(a.state_id))
+    ? actions
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .sort((a, b) => Number(b.state_id) - Number(a.state_id))
+    : null
 }
 
 export function getDelayedActions({
@@ -124,12 +126,14 @@ export function getDelayedActions({
       ] as PRIORITIES)
     : undefined
 
-  actions = actions?.filter(
-    (action) =>
-      isBefore(parseISO(action.date), new Date()) &&
-      Number(action.state_id) !== FINISHED_ID &&
-      (priority ? action.priority_id === priority : true)
-  )
+  actions = actions
+    ? actions.filter(
+        (action) =>
+          isBefore(parseISO(action.date), new Date()) &&
+          Number(action.state_id) !== FINISHED_ID &&
+          (priority ? action.priority_id === priority : true)
+      )
+    : []
 
   return actions
 }
@@ -139,32 +143,29 @@ export function getNotFinishedActions({
 }: {
   actions?: Action[] | null
 }) {
-  return actions?.filter(
-    (action) =>
-      isAfter(parseISO(action.date), new Date()) &&
-      action.state_id !== FINISHED_ID
-  )
+  return actions
+    ? actions.filter(
+        (action) =>
+          isAfter(parseISO(action.date), new Date()) &&
+          action.state_id !== FINISHED_ID
+      )
+    : []
 }
 
 export function getUrgentActions(actions: Action[] | null) {
-  return actions?.filter(
-    (action) =>
-      action.priority_id === PRIORITY_HIGH && action.state_id !== FINISHED_ID
-  )
+  return actions
+    ? actions.filter(
+        (action) =>
+          action.priority_id === PRIORITY_HIGH &&
+          action.state_id !== FINISHED_ID
+      )
+    : []
 }
 
-export function getTodayActions({
-  actions,
-  finished,
-}: {
-  actions?: Action[] | null
-  finished?: boolean
-}) {
-  return actions?.filter(
-    (action) =>
-      isToday(parseISO(action.date)) &&
-      (finished || action.state_id !== FINISHED_ID)
-  )
+export function getTodayActions({ actions }: { actions?: Action[] | null }) {
+  return actions
+    ? actions.filter((action) => isToday(parseISO(action.date)))
+    : []
 }
 
 export function getInstagramActions({
@@ -173,10 +174,12 @@ export function getInstagramActions({
   actions?: Action[] | null
 }) {
   return actions
-    ?.filter((action) =>
-      [POST_ID, VIDEO_ID].includes(Number(action.category_id))
-    )
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    ? actions
+        .filter((action) =>
+          [POST_ID, VIDEO_ID].includes(Number(action.category_id))
+        )
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    : []
 }
 
 const iconsList: { [key: string]: LucideIcon } = {

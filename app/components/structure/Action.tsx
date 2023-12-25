@@ -1,4 +1,4 @@
-import { useNavigate, useSubmit } from "@remix-run/react"
+import { useFetcher, useNavigate, useSubmit } from "@remix-run/react"
 import {
   addHours,
   format,
@@ -6,9 +6,10 @@ import {
   isSameYear,
   parseISO,
 } from "date-fns"
-import ptBR from "date-fns/locale/pt-BR"
+
+import { ptBR } from "date-fns/locale"
 import { CopyIcon, PencilLineIcon, TimerIcon, TrashIcon } from "lucide-react"
-import { Fragment, useEffect, useState } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import {
   FINISHED_ID,
   PRIORITY_HIGH,
@@ -28,6 +29,7 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "../ui/ui/context-menu"
+import { flushSync } from "react-dom"
 
 export function ActionLine({
   action,
@@ -178,13 +180,18 @@ export function ActionBlock({
   states: State[]
   client?: Client
 }) {
-  const submit = useSubmit()
-  const navigate = useNavigate()
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const fetcher = useFetcher()
   const [edit, setEdit] = useState(false)
   const [isHover, setHover] = useState(false)
 
+  if (fetcher.formData?.has("title")) {
+    action.title = String(fetcher.formData?.get("title"))
+  }
+
   const handleActions = (data: { [key: string]: string | number }) => {
-    submit(
+    fetcher.submit(
       { ...data },
       {
         action: "/handle-actions",
@@ -198,16 +205,13 @@ export function ActionBlock({
     <ContextMenu>
       <ContextMenuTrigger>
         <div
-          role="button"
-          tabIndex={-1}
-          onKeyDown={() => {}}
           title={action.title}
-          className={`highlight-soft group/action flex cursor-pointer flex-col justify-between gap-2 overflow-hidden rounded border-l-4 px-4 py-2 text-sm transition @container border-${states.find(
+          className={`highlight-soft group/action flex w-full flex-col justify-between gap-2 overflow-hidden rounded border-l-4 px-4 py-2 text-sm transition @container border-${states.find(
             (state) => state.id === Number(action.state_id)
           )?.slug} ${
             edit
-              ? "bg-gray-700 text-gray-100"
-              : "border-white/20 bg-gray-900 from-white/10 via-transparent hover:bg-gradient-to-b hover:text-gray-200"
+              ? "bg-gray-800 text-gray-200"
+              : "border-white/20 bg-gray-900 from-white/5 hover:bg-gradient-to-b hover:text-gray-200"
           }`}
           onMouseEnter={() => {
             setHover(true)
@@ -215,44 +219,59 @@ export function ActionBlock({
           onMouseLeave={() => {
             setHover(false)
           }}
-          onClick={(e) => {
-            if (e.shiftKey) {
-              setEdit(true)
-            } else {
-              navigate(`/dashboard/action/${action.id}`)
-            }
-          }}
         >
           {isHover && !edit ? (
             <ShortcutActions handleActions={handleActions} action={action} />
           ) : null}
           {/* Title */}
-          <div className="relative text-lg font-medium leading-tight">
-            <input
-              readOnly={!edit}
-              type="text"
-              defaultValue={action.title}
-              className={`bg-transparent outline-none ${
-                !edit ? "cursor-pointer opacity-0" : "opacity-100"
-              }`}
-              onBlur={(e) => {
-                if (e.target.value !== action.title)
-                  handleActions({
-                    action: "action-update",
-                    id: action.id,
-                    title: e.target.value,
+          <div className="relative -ml-2 text-lg font-medium leading-tight">
+            {edit ? (
+              <fetcher.Form
+                method="POST"
+                onSubmit={() => {
+                  // event.preventDefault()
+                  // if (event.currentTarget.value !== action.title) {
+                  flushSync(() => {
+                    setEdit(false)
                   })
+                  buttonRef.current?.focus()
+                  // }
+                }}
+              >
+                <input
+                  ref={inputRef}
+                  type="text"
+                  defaultValue={action.title}
+                  className={`rounded-md bg-background px-2 py-1 outline-none ring-1 ring-gray-700`}
+                  onBlur={() => {
+                    if (
+                      inputRef.current?.value !== undefined &&
+                      inputRef.current?.value !== action.title
+                    )
+                      handleActions({
+                        action: "action-update",
+                        id: action.id,
+                        title: inputRef.current?.value,
+                      })
 
-                setEdit(() => false)
-              }}
-            />
-            <span
-              className={`pointer-events-none absolute left-0 top-0 line-clamp-1 ${
-                edit ? "opacity-0 " : "opacity-100"
-              }`}
-            >
-              {action.title}
-            </span>
+                    setEdit(() => false)
+                  }}
+                />
+              </fetcher.Form>
+            ) : (
+              <button
+                ref={buttonRef}
+                className={`line-clamp-1 rounded-md px-2 py-1 outline-none ring-primary focus:ring-2`}
+                onClick={() => {
+                  flushSync(() => {
+                    setEdit(true)
+                  })
+                  inputRef.current?.select()
+                }}
+              >
+                {action.title}
+              </button>
+            )}
           </div>
           <div className="flex items-center justify-between text-gray-400">
             <div className="flex items-center gap-2">

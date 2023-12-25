@@ -1,15 +1,16 @@
 import { LoaderFunctionArgs, MetaFunction, json } from "@remix-run/node"
-import { Link, useFetchers, useLoaderData, useMatches } from "@remix-run/react"
+import { Link, useLoaderData, useMatches } from "@remix-run/react"
+import { LaughIcon } from "lucide-react"
 import { useState } from "react"
 import { BlockOfActions, ListOfActions } from "~/components/structure/Action"
 import CreateAction from "~/components/structure/CreateAction"
 import { ScrollArea } from "~/components/ui/ui/scroll-area"
 import { Toggle } from "~/components/ui/ui/toggle"
+import { FINISHED_ID } from "~/lib/constants"
 import {
   AvatarClient,
   getDelayedActions,
   getNotFinishedActions,
-  getOptimisticActions,
   getTodayActions,
   sortActions,
 } from "~/lib/helpers"
@@ -33,17 +34,19 @@ export const meta: MetaFunction = () => {
 export default function DashboardIndex() {
   let { actions } = useLoaderData<typeof loader>()
   const matches = useMatches()
-  const fetchers = useFetchers()
+  // const fetchers = useFetchers()
   const [allActions, setAllActions] = useState(false)
 
   const { categories, priorities, states, clients } = matches[1]
     .data as DashboardDataType
 
-  const optimisticActions = getOptimisticActions({ actions, fetchers })
-  actions = sortActions([...actions!, ...optimisticActions]) as Action[]
+  // const optimisticActions = getOptimisticActions({ actions, fetchers })
+  // actions = sortActions([...actions!, ...optimisticActions]) as Action[]
+
+  actions = sortActions(actions)
 
   const lateActions = getDelayedActions({ actions })
-  const todayActions = getTodayActions({ actions, finished: allActions })
+  const todayActions = getTodayActions({ actions })
   const notFinishedActions = getNotFinishedActions({ actions })
 
   return (
@@ -78,27 +81,39 @@ export default function DashboardIndex() {
               </h2>
               <div>
                 <Toggle pressed={allActions} onPressedChange={setAllActions}>
-                  Mostrar Todas
+                  {allActions
+                    ? "Apenas ações não finalizadas"
+                    : "Mostrar todas"}
                 </Toggle>
               </div>
             </div>
 
-            <BlockOfActions
-              categories={categories}
-              priorities={priorities}
-              states={states}
-              actions={todayActions}
-              clients={clients}
-            />
+            {todayActions.filter((action) => action.state_id !== FINISHED_ID)
+              .length > 0 || allActions ? (
+              <BlockOfActions
+                categories={categories}
+                priorities={priorities}
+                states={states}
+                actions={
+                  allActions
+                    ? todayActions
+                    : todayActions.filter(
+                        (action) => action.state_id !== FINISHED_ID
+                      )
+                }
+                clients={clients}
+              />
+            ) : (
+              <div className="flex items-center justify-center gap-4">
+                <LaughIcon className="size-6 text-gray-400" />
+                <div>Todas as ações de hoje já foram concluídas</div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="grid place-content-center p-8 text-xl">
             <div className="space-y-4 rounded-lg bg-gray-900 p-8 text-center">
-              {getTodayActions({ actions, finished: true })?.length ? (
-                <div>Todas as ações de hoje já foram concluídas</div>
-              ) : (
-                <div>Nenhuma ação para hoje</div>
-              )}
+              <div>Nenhuma ação para hoje</div>
               <CreateAction mode="button" />
             </div>
           </div>
