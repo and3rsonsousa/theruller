@@ -28,7 +28,7 @@ import {
   VIDEO_ID,
 } from "./constants"
 import { cn } from "./utils"
-import { Fetcher } from "@remix-run/react"
+import { useFetchers } from "@remix-run/react"
 
 export function ShortText({
   text,
@@ -117,7 +117,7 @@ export function getDelayedActions({
   actions,
   priority,
 }: {
-  actions?: Action[] | null
+  actions: Action[]
   priority?: PRIORITIES
 }) {
   priority = priority
@@ -251,34 +251,41 @@ export function convertToAction(data: { [key: string]: unknown }): Action {
   return action
 }
 
-export function getOptimisticActions({
-  actions,
-  fetchers,
-}: {
-  actions?: Action[] | null
-  fetchers: (Fetcher & { key: string })[]
-}): Action[] {
-  return fetchers?.reduce<Action[]>((memo, fetcher) => {
-    if (fetcher.formData) {
-      const data = Object.fromEntries(fetcher.formData)
-
-      if (data.action === "action-update") {
-        const actionIndex = actions?.findIndex(
-          (action) => action.id === data.id
-        )
-
-        const action: Action = { ...actions![actionIndex!], ...data }
-        actions?.splice(actionIndex!, 1, action)
-      } else if (data.action === "action-create") {
-        if (actions?.find((action) => action.id !== data.id))
-          memo.push(convertToAction(data))
-      } else if (data.action === "action-delete") {
-        const actionIndex = actions?.findIndex(
-          (action) => action.id === data.id
-        )
-        actions?.splice(actionIndex!, 1)
+export function useOptimisticRemovedActions() {
+  return useFetchers()
+    .filter((fetcher) => {
+      if (!fetcher.formData) {
+        return false
       }
-    }
-    return memo
-  }, [])
+      return fetcher.formData.get("action") === "action-delete"
+    })
+    .map((fetcher) => {
+      return String(fetcher.formData?.get("id"))
+    })
+}
+export function useOptimisticAddedActions() {
+  return useFetchers()
+    .filter((fetcher) => {
+      if (!fetcher.formData) {
+        return false
+      }
+      return fetcher.formData.get("action") === "action-create"
+    })
+    .map((fetcher) => {
+      const action = {
+        id: String(fetcher.formData?.get("id")),
+        title: String(fetcher.formData?.get("title")),
+        description: String(fetcher.formData?.get("description")),
+        client_id: Number(fetcher.formData?.get("client_id")),
+        category_id: Number(fetcher.formData?.get("category_id")),
+        state_id: Number(fetcher.formData?.get("state_id")),
+        user_id: String(fetcher.formData?.get("user_id")),
+        date: String(fetcher.formData?.get("date")),
+        responsibles: String(fetcher.formData?.getAll("responsibles")).split(
+          ","
+        ),
+      }
+
+      return { ...action }
+    })
 }

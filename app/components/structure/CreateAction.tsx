@@ -98,7 +98,7 @@ export default function CreateAction({
           </Button>
         )}
       </PopoverTrigger>
-      <PopoverContent className="bg-content w-[90dvw] sm:max-w-md md:px-6">
+      <PopoverContent className="bg-content w-[90dvw] sm:w-auto md:px-6">
         {/* <pre className="text-xs">
 					{JSON.stringify(cleanAction.date, undefined, 2)}
 				</pre>
@@ -244,11 +244,11 @@ export default function CreateAction({
             </Select>
             {/* Responsáveis */}
             <DropdownMenu>
-              <DropdownMenuTrigger
-                asChild
-                className="rounded-lg border-none p-2 outline-none focus:ring-2 focus:ring-primary focus:ring-offset-0"
-              >
-                <div className="flex pl-2">
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="flex rounded border-none p-2 pl-2 outline-none focus:ring-2 focus:ring-primary focus:ring-offset-0"
+                  tabIndex={0}
+                >
                   {responsibles.map((person) => (
                     <Avatar
                       key={person.id}
@@ -257,7 +257,7 @@ export default function CreateAction({
                       <AvatarImage src={person.image} />
                     </Avatar>
                   ))}
-                </div>
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-content">
                 {people.map((person) => (

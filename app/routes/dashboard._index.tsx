@@ -2,6 +2,7 @@ import { LoaderFunctionArgs, MetaFunction, json } from "@remix-run/node"
 import { Link, useLoaderData, useMatches } from "@remix-run/react"
 import { LaughIcon } from "lucide-react"
 import { useState } from "react"
+import invariant from "tiny-invariant"
 import { BlockOfActions, ListOfActions } from "~/components/structure/Action"
 import CreateAction from "~/components/structure/CreateAction"
 import { ScrollArea } from "~/components/ui/ui/scroll-area"
@@ -13,6 +14,8 @@ import {
   getNotFinishedActions,
   getTodayActions,
   sortActions,
+  useOptimisticAddedActions,
+  useOptimisticRemovedActions,
 } from "~/lib/helpers"
 import { SupabaseServerClient } from "~/lib/supabase"
 
@@ -34,18 +37,32 @@ export const meta: MetaFunction = () => {
 export default function DashboardIndex() {
   let { actions } = useLoaderData<typeof loader>()
   const matches = useMatches()
-  // const fetchers = useFetchers()
   const [allActions, setAllActions] = useState(false)
+
+  invariant(actions)
 
   const { categories, priorities, states, clients } = matches[1]
     .data as DashboardDataType
 
-  // const optimisticActions = getOptimisticActions({ actions, fetchers })
-  // actions = sortActions([...actions!, ...optimisticActions]) as Action[]
+  const optimisticAddedActions = useOptimisticAddedActions()
+  const optimisticRemovedIDs = useOptimisticRemovedActions()
+
+  for (const action of optimisticAddedActions) {
+    if (!actions.find((a) => a.id === action.id)) {
+      actions.push(action as Action)
+    }
+  }
+
+  for (const id of optimisticRemovedIDs) {
+    actions.splice(
+      actions.findIndex((action) => action.id === id),
+      1
+    )
+  }
 
   actions = sortActions(actions)
 
-  const lateActions = getDelayedActions({ actions })
+  const lateActions = getDelayedActions({ actions: actions as Action[] })
   const todayActions = getTodayActions({ actions })
   const notFinishedActions = getNotFinishedActions({ actions })
 

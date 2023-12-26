@@ -1,7 +1,6 @@
 import { LoaderFunctionArgs, json } from "@remix-run/node"
 import {
   Link,
-  useFetchers,
   useLoaderData,
   useMatches,
   useSearchParams,
@@ -24,6 +23,7 @@ import {
 import { ptBR } from "date-fns/locale"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 import { useEffect, useState } from "react"
+import invariant from "tiny-invariant"
 import { ListOfActions } from "~/components/structure/Action"
 import CreateAction from "~/components/structure/CreateAction"
 import { Button } from "~/components/ui/ui/button"
@@ -33,7 +33,12 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "~/components/ui/ui/dropdown-menu"
-import { Icons, getOptimisticActions } from "~/lib/helpers"
+import {
+  Icons,
+  sortActions,
+  useOptimisticAddedActions,
+  useOptimisticRemovedActions,
+} from "~/lib/helpers"
 import { SupabaseServerClient } from "~/lib/supabase"
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
@@ -81,15 +86,30 @@ export default function Client() {
   const date = searchParams.get("date") || format(new Date(), "yyyy-MM-dd")
   const currentDate = parseISO(date)
 
+  invariant(actions)
+
   const days = eachDayOfInterval({
     start: startOfWeek(startOfMonth(currentDate)),
     end: endOfWeek(endOfMonth(currentDate)),
   })
 
-  const fetchers = useFetchers()
+  const optimisticAddedActions = useOptimisticAddedActions()
+  const optimisticRemovedIDs = useOptimisticRemovedActions()
 
-  const optimisticActions = getOptimisticActions({ actions, fetchers })
-  actions = [...actions!, ...optimisticActions]
+  for (const action of optimisticAddedActions) {
+    if (!actions.find((a) => a.id === action.id)) {
+      actions.push(action as Action)
+    }
+  }
+
+  for (const id of optimisticRemovedIDs) {
+    actions.splice(
+      actions.findIndex((action) => action.id === id),
+      1
+    )
+  }
+
+  actions = sortActions(actions)
 
   const calendar = days.map((day) => {
     return {
