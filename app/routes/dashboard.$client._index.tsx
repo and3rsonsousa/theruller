@@ -33,11 +33,12 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "~/components/ui/ui/dropdown-menu"
+import { INTENTS } from "~/lib/constants"
 import {
   Icons,
   sortActions,
-  useOptimisticAddedActions,
-  useOptimisticRemovedActions,
+  useIDsToRemove,
+  usePendingActions,
 } from "~/lib/helpers"
 import { SupabaseServerClient } from "~/lib/supabase"
 
@@ -93,8 +94,8 @@ export default function Client() {
     end: endOfWeek(endOfMonth(currentDate)),
   })
 
-  const optimisticAddedActions = useOptimisticAddedActions()
-  const optimisticRemovedIDs = useOptimisticRemovedActions()
+  const optimisticAddedActions = usePendingActions()
+  const optimisticRemovedIDs = useIDsToRemove()
 
   for (const action of optimisticAddedActions) {
     if (!actions.find((a) => a.id === action.id)) {
@@ -134,7 +135,7 @@ export default function Client() {
               draggedAction.date
             ).getMinutes()}`
           ),
-          action: "action-update",
+          intent: INTENTS.updateAction,
         },
         {
           action: "/handle-actions",
@@ -304,7 +305,7 @@ export default function Client() {
         </div>
         <div
           id="divider"
-          className="absolute bottom-0 hidden h-[1px] w-full bg-gradient-to-r  from-transparent via-gray-700"
+          className="absolute bottom-0 hidden h-[1px] w-full bg-gradient-to-r from-transparent via-gray-700"
         ></div>
       </div>
       <div
@@ -329,7 +330,8 @@ export default function Client() {
               e.currentTarget.classList.add("dragover")
             }}
           >
-            <div className="absolute -top-[1px] left-0 right-0 mt-24 h-[1px] bg-gradient-to-r from-transparent via-gray-500 opacity-0 transition group-hover/day:opacity-100"></div>
+            <div className="absolute -top-[1px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-gray-500 opacity-0 transition group-hover/day:opacity-100"></div>
+
             <div className="my-1 flex justify-between">
               <div
                 className={`grid h-6 w-6 place-content-center rounded-full text-xs ${

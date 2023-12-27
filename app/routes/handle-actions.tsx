@@ -1,15 +1,17 @@
 import { ActionFunctionArgs, json } from "@remix-run/node"
 import { format } from "date-fns"
-import { PRIORITY_MEDIUM } from "~/lib/constants"
+import { INTENTS, PRIORITIES } from "~/lib/constants"
 import { SupabaseServerClient } from "~/lib/supabase"
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { headers, supabase } = SupabaseServerClient({ request })
 
   const formData = await request.formData()
-  const { action, id, ...values } = Object.fromEntries(formData.entries())
+  const { intent, id, ...values } = Object.fromEntries(formData.entries())
 
-  if (action === "action-create") {
+  if (!intent) throw new Error("No intent was defined")
+
+  if (intent === INTENTS.createAction) {
     const actionToInsert = {
       id: id.toString(),
       category_id: Number(values["category_id"]),
@@ -20,7 +22,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       title: values["title"].toString(),
       responsibles: values["responsibles"].toString().split(","),
       user_id: values["user_id"].toString(),
-      priority_id: PRIORITY_MEDIUM,
+      priority_id: PRIORITIES.medium,
     }
 
     const { data, error } = await supabase
@@ -30,7 +32,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       .single()
 
     return json({ data, error }, { headers })
-  } else if (action === "action-update") {
+  } else if (intent === INTENTS.updateAction) {
     if (values["responsibles"]) {
       const { data, error } = await supabase
         .from("actions")
@@ -52,7 +54,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
       return { data, error }
     }
-  } else if (action === "action-duplicate") {
+  } else if (intent === INTENTS.duplicateAction) {
     const { data: oldAction } = await supabase
       .from("actions")
       .select("*")
@@ -75,7 +77,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
       return { newAction, error }
     }
-  } else if (action === "action-delete") {
+  } else if (intent === INTENTS.deleteAction) {
     const data = await supabase.from("actions").delete().eq("id", id)
 
     return { data }

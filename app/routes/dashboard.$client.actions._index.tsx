@@ -1,5 +1,6 @@
 import { LoaderFunctionArgs } from "@remix-run/node"
 import { useLoaderData, useMatches } from "@remix-run/react"
+import invariant from "tiny-invariant"
 import { BlockOfActions, ListOfActions } from "~/components/structure/Action"
 import {
   getDelayedActions,
@@ -30,6 +31,8 @@ export default function Actions() {
   const { actions } = useLoaderData<typeof loader>() || {}
   const { categories, priorities, states, clients } = matches[1]
     .data as DashboardDataType
+
+  invariant(actions)
 
   const lateActions = getDelayedActions({ actions })
   const todayActions = getTodayActions({ actions })

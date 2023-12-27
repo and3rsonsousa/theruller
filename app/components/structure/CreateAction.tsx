@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "../ui/ui/select"
 import { useToast } from "../ui/ui/use-toast"
+import { INTENTS } from "~/lib/constants"
 
 export default function CreateAction({
   date,
@@ -427,7 +428,7 @@ export default function CreateAction({
                   submit(
                     {
                       id: window.crypto.randomUUID(),
-                      action: "action-create",
+                      intent: INTENTS.createAction,
                       ...action,
                       date: format(action.date, "y-MM-dd HH:mm:ss", {
                         locale: ptBR,

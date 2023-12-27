@@ -1,4 +1,4 @@
-import { useFetcher, useNavigate, useSubmit } from "@remix-run/react"
+import { Form, useNavigate, useSubmit } from "@remix-run/react"
 import {
   addHours,
   format,
@@ -10,12 +10,8 @@ import {
 import { ptBR } from "date-fns/locale"
 import { CopyIcon, PencilLineIcon, TimerIcon, TrashIcon } from "lucide-react"
 import { Fragment, useEffect, useRef, useState } from "react"
-import {
-  FINISHED_ID,
-  PRIORITY_HIGH,
-  PRIORITY_LOW,
-  PRIORITY_MEDIUM,
-} from "~/lib/constants"
+import { flushSync } from "react-dom"
+import { FINISHED_ID, INTENTS, PRIORITIES } from "~/lib/constants"
 import { AvatarClient, Icons } from "~/lib/helpers"
 import {
   ContextMenu,
@@ -29,7 +25,6 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "../ui/ui/context-menu"
-import { flushSync } from "react-dom"
 
 export function ActionLine({
   action,
@@ -52,10 +47,13 @@ export function ActionLine({
 }) {
   const [edit, setEdit] = useState(false)
   const [isHover, setHover] = useState(false)
-  const submit = useSubmit()
   const navigate = useNavigate()
 
-  const handleActions = (data: { [key: string]: string | number }) => {
+  const submit = useSubmit()
+
+  function handleActions(data: {
+    [key: string]: string | number | null | string[]
+  }) {
     submit(
       { ...data },
       {
@@ -101,7 +99,7 @@ export function ActionLine({
         >
           {/* Atalhos */}
           {isHover && !edit && !edit ? (
-            <ShortcutActions action={action} handleActions={handleActions} />
+            <ShortcutActions action={action} />
           ) : null}
           <div className="flex shrink grow items-center gap-2">
             {showCategory && (
@@ -125,10 +123,11 @@ export function ActionLine({
                 }`}
                 onBlur={(e) => {
                   if (e.target.value !== action.title)
-                    handleActions({
-                      action: "action-update",
-                      id: action.id,
+                    submit({
+                      intent: INTENTS.updateAction,
+                      ...action,
                       title: e.target.value,
+                      fetcherKey: `action:${action.id}:update:name`,
                     })
 
                   setEdit(() => false)
@@ -182,16 +181,14 @@ export function ActionBlock({
 }) {
   const buttonRef = useRef<HTMLButtonElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const fetcher = useFetcher()
+  const submit = useSubmit()
   const [edit, setEdit] = useState(false)
   const [isHover, setHover] = useState(false)
 
-  if (fetcher.formData?.has("title")) {
-    action.title = String(fetcher.formData?.get("title"))
-  }
-
-  const handleActions = (data: { [key: string]: string | number }) => {
-    fetcher.submit(
+  function handleActions(data: {
+    [key: string]: string | number | null | string[]
+  }) {
+    submit(
       { ...data },
       {
         action: "/handle-actions",
@@ -220,13 +217,11 @@ export function ActionBlock({
             setHover(false)
           }}
         >
-          {isHover && !edit ? (
-            <ShortcutActions handleActions={handleActions} action={action} />
-          ) : null}
+          {isHover && !edit ? <ShortcutActions action={action} /> : null}
           {/* Title */}
           <div className="relative -ml-2 text-lg font-medium leading-tight">
             {edit ? (
-              <fetcher.Form
+              <Form
                 method="POST"
                 onSubmit={() => {
                   // event.preventDefault()
@@ -249,19 +244,19 @@ export function ActionBlock({
                       inputRef.current?.value !== action.title
                     )
                       handleActions({
-                        action: "action-update",
-                        id: action.id,
+                        intent: INTENTS.updateAction,
+                        ...action,
                         title: inputRef.current?.value,
                       })
 
                     setEdit(() => false)
                   }}
                 />
-              </fetcher.Form>
+              </Form>
             ) : (
               <button
                 ref={buttonRef}
-                className={`line-clamp-1 rounded-md px-2 py-1 outline-none ring-primary focus:ring-2`}
+                className={`block w-full overflow-hidden text-ellipsis text-nowrap rounded-md px-2 py-1 text-left outline-none ring-primary focus:ring-2`}
                 onClick={() => {
                   flushSync(() => {
                     setEdit(true)
@@ -287,7 +282,7 @@ export function ActionBlock({
                   className="w-4"
                 />
               </div>
-              {action.priority_id === PRIORITY_HIGH ? (
+              {action.priority_id === PRIORITIES.high ? (
                 <div>
                   <Icons id={"high"} className="w-4" type="priority" />
                 </div>
@@ -345,7 +340,9 @@ export function ActionGrid({
   const [isHover, setHover] = useState(false)
   const submit = useSubmit()
 
-  const handleActions = (data: { [key: string]: string | number }) => {
+  function handleActions(data: {
+    [key: string]: string | number | null | string[]
+  }) {
     submit(
       { ...data },
       {
@@ -368,9 +365,7 @@ export function ActionGrid({
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
         >
-          {isHover ? (
-            <ShortcutActions action={action} handleActions={handleActions} />
-          ) : null}
+          {isHover ? <ShortcutActions action={action} /> : null}
           <div></div>
           <div
             className={`line-clamp-4 py-4 text-center font-medium transition group-hover/action:text-gray-300 ${
@@ -529,14 +524,22 @@ export function GridOfActions({
   )
 }
 
-function ShortcutActions({
-  action,
-  handleActions,
-}: {
-  action: Action
-  handleActions: (data: { [key: string]: string | number }) => void
-}) {
+function ShortcutActions({ action }: { action: Action }) {
   const navigate = useNavigate()
+  const submit = useSubmit()
+
+  function handleActions(data: {
+    [key: string]: string | number | null | string[]
+  }) {
+    submit(
+      { ...data },
+      {
+        action: "/handle-actions",
+        method: "post",
+        navigate: false,
+      }
+    )
+  }
 
   useEffect(() => {
     const keyDown = async function (event: KeyboardEvent) {
@@ -563,39 +566,39 @@ function ShortcutActions({
         }
 
         handleActions({
-          action: "action-update",
-          id: action.id,
+          intent: INTENTS.updateAction,
+          ...action,
           state_id,
         })
       } else if (key === "e") {
         navigate(`/dashboard/action/${action.id}`)
       } else if (key === "d") {
         handleActions({
-          id: action.id,
+          ...action,
           newId: window.crypto.randomUUID(),
           created_at: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
           updated_at: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-          action: "action-duplicate",
+          intent: INTENTS.duplicateAction,
         })
       } else if (key === "x") {
-        handleActions({ id: action.id, action: "action-delete" })
+        handleActions({ ...action, intent: INTENTS.deleteAction })
       } else if (key === "1") {
         handleActions({
-          id: action.id,
-          action: "action-update",
-          priority_id: PRIORITY_LOW,
+          ...action,
+          intent: INTENTS.updateAction,
+          priority_id: PRIORITIES.low,
         })
       } else if (key === "2") {
         handleActions({
-          id: action.id,
-          action: "action-update",
-          priority_id: PRIORITY_MEDIUM,
+          ...action,
+          intent: INTENTS.updateAction,
+          priority_id: PRIORITIES.medium,
         })
       } else if (key === "3") {
         handleActions({
-          id: action.id,
-          action: "action-update",
-          priority_id: PRIORITY_HIGH,
+          ...action,
+          intent: INTENTS.updateAction,
+          priority_id: PRIORITIES.high,
         })
       } else if (key === "h") {
         const date = parseISO(action.date)
@@ -603,8 +606,8 @@ function ShortcutActions({
         date.setHours(new Date().getHours() + 1)
 
         handleActions({
-          id: action.id,
-          action: "action-update",
+          ...action,
+          intent: INTENTS.updateAction,
           date: format(date, "yyyy-MM-dd HH:mm:ss"),
         })
       }
@@ -612,7 +615,7 @@ function ShortcutActions({
     window.addEventListener("keydown", keyDown)
 
     return () => window.removeEventListener("keydown", keyDown)
-  }, [action, handleActions, navigate])
+  }, [action, navigate])
 
   return <></>
 }
@@ -628,7 +631,9 @@ function ContextMenuItems({
   categories: Category[]
   states: State[]
   priorities: Priority[]
-  handleActions: (data: { [key: string]: string | number }) => void
+  handleActions: (data: {
+    [key: string]: string | number | null | string[]
+  }) => void
 }) {
   const navigate = useNavigate()
 
@@ -706,8 +711,8 @@ function ContextMenuItems({
                       )
 
                       handleActions({
-                        action: "action-update",
-                        id: action.id,
+                        intent: INTENTS.updateAction,
+                        ...action,
                         date,
                       })
                     }}
@@ -752,9 +757,9 @@ function ContextMenuItems({
                 className="bg-item flex items-center gap-2"
                 onSelect={() => {
                   handleActions({
-                    id: action.id,
+                    ...action,
                     priority_id: priority.id,
-                    action: "action-update",
+                    intent: INTENTS.updateAction,
                   })
                 }}
               >
@@ -791,9 +796,9 @@ function ContextMenuItems({
                 className="bg-item flex items-center gap-2"
                 onSelect={() => {
                   handleActions({
-                    id: action.id,
+                    ...action,
                     category_id: category.id,
-                    action: "action-update",
+                    intent: INTENTS.updateAction,
                   })
                 }}
               >
@@ -827,7 +832,7 @@ function ContextMenuItems({
                 className="bg-item flex items-center gap-2 focus:bg-primary"
                 onSelect={() => {
                   handleActions({
-                    id: action.id,
+                    ...action,
                     state_id: state.id,
                   })
                 }}

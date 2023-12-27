@@ -14,8 +14,8 @@ import {
   getNotFinishedActions,
   getTodayActions,
   sortActions,
-  useOptimisticAddedActions,
-  useOptimisticRemovedActions,
+  usePendingActions,
+  useIDsToRemove,
 } from "~/lib/helpers"
 import { SupabaseServerClient } from "~/lib/supabase"
 
@@ -41,26 +41,34 @@ export default function DashboardIndex() {
 
   invariant(actions)
 
+  const _actions = new Map<string, Action>(
+    actions.map((action) => [action.id, action])
+  )
+
   const { categories, priorities, states, clients } = matches[1]
     .data as DashboardDataType
 
-  const optimisticAddedActions = useOptimisticAddedActions()
-  const optimisticRemovedIDs = useOptimisticRemovedActions()
+  const pendingActions = usePendingActions()
+  const idsToRemove = useIDsToRemove()
 
-  for (const action of optimisticAddedActions) {
-    if (!actions.find((a) => a.id === action.id)) {
-      actions.push(action as Action)
-    }
+  // console.log(pendingActions)
+
+  for (const action of pendingActions as Action[]) {
+    // if (!actions.find((a) => a.id === action.id)) {
+    _actions.set(action.id, action)
+    //   actions.push(action as Action)
+    // }
   }
 
-  for (const id of optimisticRemovedIDs) {
+  for (const id of idsToRemove) {
+    _actions.delete(id)
     actions.splice(
       actions.findIndex((action) => action.id === id),
       1
     )
   }
 
-  actions = sortActions(actions)
+  actions = sortActions(Array.from(_actions, ([, v]) => v))
 
   const lateActions = getDelayedActions({ actions: actions as Action[] })
   const todayActions = getTodayActions({ actions })

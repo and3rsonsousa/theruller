@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/ui/select"
+import { INTENTS } from "~/lib/constants"
 import { AvatarClient, Icons } from "~/lib/helpers"
 import { SupabaseServerClient } from "~/lib/supabase"
 
@@ -198,7 +199,7 @@ export default function ActionPage() {
                       if (client.id !== action.client_id) {
                         await handleActions({
                           id: action.id,
-                          action: "action-update",
+                          intent: INTENTS.updateAction,
                           client_id: Number(client.id),
                         })
 
@@ -475,7 +476,7 @@ export default function ActionPage() {
                 handleActions({
                   ...action,
                   responsibles: action.responsibles,
-                  action: "action-update",
+                  intent: INTENTS.updateAction,
                 })
               }}
             >

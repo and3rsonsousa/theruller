@@ -1,3 +1,4 @@
+import { useFetchers } from "@remix-run/react"
 import { isAfter, isBefore, isToday, parseISO } from "date-fns"
 import {
   CircleDashedIcon,
@@ -21,14 +22,12 @@ import { CSSProperties } from "react"
 import { Avatar, AvatarFallback } from "~/components/ui/ui/avatar"
 import {
   FINISHED_ID,
+  INTENTS,
   POST_ID,
-  PRIORITY_HIGH,
-  PRIORITY_LOW,
-  PRIORITY_MEDIUM,
+  PRIORITIES,
   VIDEO_ID,
 } from "./constants"
 import { cn } from "./utils"
-import { useFetchers } from "@remix-run/react"
 
 export function ShortText({
   text,
@@ -121,7 +120,7 @@ export function getDelayedActions({
   priority?: PRIORITIES
 }) {
   priority = priority
-    ? ({ low: PRIORITY_LOW, mid: PRIORITY_MEDIUM, high: PRIORITY_HIGH }[
+    ? ({ low: PRIORITIES.low, mid: PRIORITIES.medium, high: PRIORITIES.high }[
         priority
       ] as PRIORITIES)
     : undefined
@@ -156,7 +155,7 @@ export function getUrgentActions(actions: Action[] | null) {
   return actions
     ? actions.filter(
         (action) =>
-          action.priority_id === PRIORITY_HIGH &&
+          action.priority_id === PRIORITIES.high &&
           action.state_id !== FINISHED_ID
       )
     : []
@@ -251,25 +250,28 @@ export function convertToAction(data: { [key: string]: unknown }): Action {
   return action
 }
 
-export function useOptimisticRemovedActions() {
+export function useIDsToRemove() {
   return useFetchers()
     .filter((fetcher) => {
       if (!fetcher.formData) {
         return false
       }
-      return fetcher.formData.get("action") === "action-delete"
+      return fetcher.formData.get("intent") === INTENTS.deleteAction
     })
     .map((fetcher) => {
       return String(fetcher.formData?.get("id"))
     })
 }
-export function useOptimisticAddedActions() {
+export function usePendingActions() {
   return useFetchers()
     .filter((fetcher) => {
       if (!fetcher.formData) {
         return false
       }
-      return fetcher.formData.get("action") === "action-create"
+      return (
+        fetcher.formData.get("intent") === INTENTS.createAction ||
+        fetcher.formData.get("intent") === INTENTS.updateAction
+      )
     })
     .map((fetcher) => {
       const action = {
