@@ -89,28 +89,31 @@ export default function Client() {
 
   invariant(actions)
 
+  const _actions = new Map<string, Action>(
+    actions.map((action) => [action.id, action])
+  )
+
   const days = eachDayOfInterval({
     start: startOfWeek(startOfMonth(currentDate)),
     end: endOfWeek(endOfMonth(currentDate)),
   })
 
-  const optimisticAddedActions = usePendingActions()
-  const optimisticRemovedIDs = useIDsToRemove()
+  const pendingActions = usePendingActions()
+  const idsToRemove = useIDsToRemove()
 
-  for (const action of optimisticAddedActions) {
-    if (!actions.find((a) => a.id === action.id)) {
-      actions.push(action as Action)
-    }
+  for (const action of pendingActions as Action[]) {
+    _actions.set(action.id, action)
   }
 
-  for (const id of optimisticRemovedIDs) {
+  for (const id of idsToRemove) {
+    _actions.delete(id)
     actions.splice(
       actions.findIndex((action) => action.id === id),
       1
     )
   }
 
-  actions = sortActions(actions)
+  actions = sortActions(Array.from(_actions, ([, v]) => v))
 
   const calendar = days.map((day) => {
     return {
@@ -129,7 +132,7 @@ export default function Client() {
       //
       submit(
         {
-          id: draggedAction.id,
+          ...draggedAction,
           date: date?.concat(
             `T${new Date(draggedAction.date).getHours()}:${new Date(
               draggedAction.date
@@ -141,6 +144,7 @@ export default function Client() {
           action: "/handle-actions",
           method: "POST",
           navigate: false,
+          fetcherKey: `action:${draggedAction.id}:update:move:calendar`,
         }
       )
       //reset

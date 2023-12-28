@@ -2,26 +2,18 @@ import {
   Link,
   useFetchers,
   useMatches,
+  useNavigate,
   useNavigation,
-  useOutletContext,
 } from "@remix-run/react"
-import { ChevronDownIcon } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/ui/avatar"
-import { Button } from "../ui/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/ui/dropdown-menu"
+import { Menu, MenuTrigger, Separator } from "react-aria-components"
+import { Button, MenuItem, Popover } from "../ui/spectrum/Spectrum"
 
 export default function Header() {
-  const { supabase } = useOutletContext<OutletContextType>()
+  // const { supabase } = useOutletContext<OutletContextType>()
 
   const matches = useMatches()
   const navigation = useNavigation()
+  const navigate = useNavigate()
 
   const { clients, user } = matches[1].data as DashboardDataType
   const { client } = matches[1].params
@@ -41,46 +33,62 @@ export default function Header() {
         )}
       </div>
       <div className="flex items-center justify-end gap-2 text-sm font-medium">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="flex items-center gap-2 text-xs font-medium"
+        <MenuTrigger>
+          <Button size={"sm"} variant={"ghost"}>
+            {client
+              ? clients.find((currentClient) => currentClient.slug === client)
+                  ?.title
+              : "Parceiros"}
+          </Button>
+          <Popover>
+            <Menu
+              className="outline-none"
+              onAction={(key) => {
+                navigate(`/dashboard/${key}`)
+              }}
             >
-              <div className="w-32 overflow-hidden text-ellipsis text-right sm:w-auto">
-                {client
-                  ? clients.find((c) => c.slug === client)?.title
-                  : "Clientes"}
-              </div>
-              <div>
-                <ChevronDownIcon className="w-4" />
-              </div>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-content">
-            {clients.map((client) => (
-              <DropdownMenuItem key={client.id} asChild>
-                <Link
-                  to={`/dashboard/${client.slug}`}
-                  className="bg-item focus:bg-primary"
-                >
+              {clients.map((client) => (
+                <MenuItem key={client.id} id={client.slug}>
                   {client.title}
-                </Link>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Avatar className="h-8 w-8 cursor-pointer">
-              <AvatarImage src={user.image} />
-              <AvatarFallback>
-                {user.name.split(" ")[0][0].concat(user.name.split(" ")[1][0])}
-              </AvatarFallback>
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-content">
+                </MenuItem>
+              ))}
+            </Menu>
+          </Popover>
+        </MenuTrigger>
+
+        <MenuTrigger>
+          <Button variant={"ghost"} size={"icon-sm"}>
+            <div className="size-6 overflow-hidden rounded-full">
+              <img src={user.image} alt={user.name} />
+            </div>
+          </Button>
+          <Popover>
+            <Menu className="outline-none">
+              <MenuItem id="account" href="/dashboard/account">
+                Minha Conta
+              </MenuItem>
+              <MenuItem id="logout" href="/logout">
+                Sair
+              </MenuItem>
+              <Separator className="-mx-1 my-2 h-[1px] bg-white/20" />
+              <MenuItem id="partners" href="/dashboard/account">
+                Parceiros
+              </MenuItem>
+              <MenuItem id="new-partner" href="/dashboard/account">
+                Novo parceiro
+              </MenuItem>
+              <Separator className="-mx-1 my-2 h-[1px] bg-white/20" />
+              <MenuItem id="users" href="/dashboard/account">
+                Usuários
+              </MenuItem>
+              <MenuItem id="new-user" href="/dashboard/account">
+                Novo usuário
+              </MenuItem>
+            </Menu>
+          </Popover>
+        </MenuTrigger>
+
+        {/* 
             <DropdownMenuItem
               onSelect={() => supabase.auth.signOut()}
               className="bg-item focus:bg-primary"
@@ -116,7 +124,7 @@ export default function Header() {
               Adicionar novo Usuário
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </MenuTrigger> */}
       </div>
 
       <div className="absolute bottom-0 h-[1px] w-full bg-gradient-to-r  from-transparent via-gray-700"></div>

@@ -51,13 +51,8 @@ export default function DashboardIndex() {
   const pendingActions = usePendingActions()
   const idsToRemove = useIDsToRemove()
 
-  // console.log(pendingActions)
-
   for (const action of pendingActions as Action[]) {
-    // if (!actions.find((a) => a.id === action.id)) {
     _actions.set(action.id, action)
-    //   actions.push(action as Action)
-    // }
   }
 
   for (const id of idsToRemove) {

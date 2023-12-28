@@ -61,7 +61,7 @@ module.exports = {
         doing: colors.pink,
         review: colors.purple,
         done: colors.sky,
-        finished: colors.emerald,
+        finished: colors.lime,
 
         post: colors.orange,
         video: colors.yellow,
