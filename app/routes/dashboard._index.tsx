@@ -73,6 +73,7 @@ export default function DashboardIndex() {
     <div className="container overflow-hidden">
       <ScrollArea className="h-full w-full px-4 md:px-8">
         <div className="pt-16"></div>
+        {/* Ações em Atraso */}
         {lateActions?.length ? (
           <div className="mb-8">
             <div className="flex justify-between py-2">
@@ -93,6 +94,18 @@ export default function DashboardIndex() {
             />
           </div>
         ) : null}
+        {/* Clientes - Parceiros - Contas */}
+        <div className="mb-8">
+          <h2 className="mb-4 text-xl font-medium">Contas</h2>
+          <div className="flex flex-wrap justify-between gap-4">
+            {clients.map((client) => (
+              <Link to={`/dashboard/${client.slug}`} key={client.id}>
+                <AvatarClient client={client} size="lg" />
+              </Link>
+            ))}
+          </div>
+        </div>
+        {/* Ações de Hoje */}
         {todayActions?.length ? (
           <div className="mb-8">
             <div className="flex justify-between py-2">
@@ -138,17 +151,6 @@ export default function DashboardIndex() {
             </div>
           </div>
         )}
-
-        <div className="mb-8">
-          <h2 className="mb-4 text-xl font-medium">Clientes</h2>
-          <div className="flex flex-wrap justify-between gap-4">
-            {clients.map((client) => (
-              <Link to={`/dashboard/${client.slug}`} key={client.id}>
-                <AvatarClient client={client} size="lg" />
-              </Link>
-            ))}
-          </div>
-        </div>
 
         <div className="mb-8">
           <div className="flex justify-between py-2">

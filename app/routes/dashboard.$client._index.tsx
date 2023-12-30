@@ -119,7 +119,10 @@ export default function Client() {
     return {
       date: day,
       actions: actions?.filter((action) =>
-        isSameDay(parseISO(action.date), day)
+        categoryFilter
+          ? isSameDay(parseISO(action.date), day) &&
+            action.category_id === categoryFilter.id
+          : isSameDay(parseISO(action.date), day)
       ),
     }
   })

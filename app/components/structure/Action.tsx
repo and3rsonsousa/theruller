@@ -1,4 +1,4 @@
-import { Form, useNavigate, useSubmit } from "@remix-run/react"
+import { Form, Link, useNavigate, useSubmit } from "@remix-run/react"
 import {
   addHours,
   format,
@@ -428,7 +428,7 @@ export function ListOfActions({
 }) {
   return (
     <div
-      className={`min-h-full  @container ${
+      className={`min-h-full @container ${
         max === 2
           ? "grid sm:grid-cols-2"
           : max === 3
@@ -620,6 +620,58 @@ function ShortcutActions({ action }: { action: Action }) {
   return <></>
 }
 
+export function formatActionDatetime({
+  date,
+  dateFormat,
+  timeFormat,
+}: {
+  date: Date | string
+  dateFormat?: 0 | 1 | 2 | 3 | 4
+  timeFormat?: 0 | 1
+}) {
+  // 0 - Sem informação de data
+  // 1 - Distância
+  // 2 - Curta
+  // 3 - Média
+  // 4 - Longa
+
+  // 0 - Sem informação de horas
+  // 1 - Com horas
+
+  date = typeof date === "string" ? parseISO(date) : date
+  const formatString = (
+    dateFormat === 2
+      ? `d/M${
+          !isSameYear(date.getFullYear(), new Date().getUTCFullYear())
+            ? "/yy"
+            : ""
+        }`
+      : dateFormat === 3
+        ? `d 'de' MMM${
+            !isSameYear(date.getFullYear(), new Date().getUTCFullYear())
+              ? " 'de' yy"
+              : ""
+          }`
+        : dateFormat === 4
+          ? `E, d 'de' MMMM${
+              !isSameYear(date.getFullYear(), new Date().getUTCFullYear())
+                ? " 'de' yyy"
+                : ""
+            }`
+          : ""
+  ).concat(
+    timeFormat
+      ? `${dateFormat ? (dateFormat === 4 ? " 'às' " : " - ") : ""}H'h'${
+          date.getMinutes() > 0 ? "m" : ""
+        }`
+      : ""
+  )
+
+  return dateFormat === 1
+    ? formatDistanceToNow(date, { locale: ptBR, addSuffix: true })
+    : format(date, formatString, { locale: ptBR })
+}
+
 function ContextMenuItems({
   action,
   categories,
@@ -635,16 +687,21 @@ function ContextMenuItems({
     [key: string]: string | number | null | string[]
   }) => void
 }) {
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
 
   return (
     <ContextMenuContent className="bg-content">
       <ContextMenuItem
-        className="bg-item flex items-center gap-2 focus:bg-primary"
-        onSelect={() => navigate(`/dashboard/action/${action.id}`)}
+        asChild
+        // onSelect={() => navigate(`/dashboard/action/${action.id}`)}
       >
-        <PencilLineIcon className="h-3 w-3" />
-        <span>Editar</span>
+        <Link
+          className="bg-item flex items-center gap-2 focus:bg-primary"
+          to={`/dashboard/action/${action.id}`}
+        >
+          <PencilLineIcon className="h-3 w-3" />
+          <span>Editar</span>
+        </Link>
       </ContextMenuItem>
       <ContextMenuItem className="bg-item flex items-center gap-2 focus:bg-primary">
         <CopyIcon className="h-3 w-3" />
@@ -834,6 +891,7 @@ function ContextMenuItems({
                   handleActions({
                     ...action,
                     state_id: state.id,
+                    intent: INTENTS.updateAction,
                   })
                 }}
               >
@@ -848,56 +906,4 @@ function ContextMenuItems({
       </ContextMenuSub>
     </ContextMenuContent>
   )
-}
-
-export function formatActionDatetime({
-  date,
-  dateFormat,
-  timeFormat,
-}: {
-  date: Date | string
-  dateFormat?: 0 | 1 | 2 | 3 | 4
-  timeFormat?: 0 | 1
-}) {
-  // 0 - Sem informação de data
-  // 1 - Distância
-  // 2 - Curta
-  // 3 - Média
-  // 4 - Longa
-
-  // 0 - Sem informação de horas
-  // 1 - Com horas
-
-  date = typeof date === "string" ? parseISO(date) : date
-  const formatString = (
-    dateFormat === 2
-      ? `d/M${
-          !isSameYear(date.getFullYear(), new Date().getUTCFullYear())
-            ? "/yy"
-            : ""
-        }`
-      : dateFormat === 3
-        ? `d 'de' MMM${
-            !isSameYear(date.getFullYear(), new Date().getUTCFullYear())
-              ? " 'de' yy"
-              : ""
-          }`
-        : dateFormat === 4
-          ? `E, d 'de' MMMM${
-              !isSameYear(date.getFullYear(), new Date().getUTCFullYear())
-                ? " 'de' yyy"
-                : ""
-            }`
-          : ""
-  ).concat(
-    timeFormat
-      ? `${dateFormat ? (dateFormat === 4 ? " 'às' " : " - ") : ""}H'h'${
-          date.getMinutes() > 0 ? "m" : ""
-        }`
-      : ""
-  )
-
-  return dateFormat === 1
-    ? formatDistanceToNow(date, { locale: ptBR, addSuffix: true })
-    : format(date, formatString, { locale: ptBR })
 }
