@@ -8,11 +8,19 @@ import {
 } from "date-fns"
 
 import { ptBR } from "date-fns/locale"
-import { CopyIcon, PencilLineIcon, TimerIcon, TrashIcon } from "lucide-react"
+import {
+  CopyIcon,
+  ExpandIcon,
+  PencilLineIcon,
+  ShrinkIcon,
+  TimerIcon,
+  TrashIcon,
+} from "lucide-react"
 import { Fragment, useEffect, useRef, useState } from "react"
 import { flushSync } from "react-dom"
 import { FINISHED_ID, INTENTS, PRIORITIES } from "~/lib/constants"
 import { AvatarClient, Icons } from "~/lib/helpers"
+import { Toggle } from "../ui/Spectrum"
 import {
   ContextMenu,
   ContextMenuContent,
@@ -69,7 +77,7 @@ export function ActionLine({
       <ContextMenuTrigger>
         <div
           title={action.title}
-          className={`highlight-soft group/action relative flex w-full cursor-pointer select-none items-center justify-between gap-2 overflow-hidden rounded border-l-4 px-2 py-1  text-sm font-medium shadow transition @[180px]:px-4 md:text-xs ${
+          className={`group/action relative flex w-full cursor-pointer select-none items-center justify-between gap-2 overflow-hidden rounded border-l-4 px-2 py-1  text-sm font-medium shadow transition @[180px]:px-4 md:text-xs ${
             edit
               ? "bg-gray-700"
               : "bg-gray-900 hover:bg-gray-800 hover:text-gray-200"
@@ -415,6 +423,7 @@ export function ListOfActions({
   date,
   max,
   onDrag,
+  isFoldable,
 }: {
   actions?: Action[] | null
   categories: Category[]
@@ -425,35 +434,65 @@ export function ListOfActions({
   date?: { dateFormat?: 0 | 1 | 2 | 3 | 4; timeFormat?: 0 | 1 }
   max?: 1 | 2 | 3
   onDrag?: (action: Action) => void
+  isFoldable?: boolean
 }) {
+  const foldCount = (max || 2) * 4
+  const [fold, setFold] = useState(isFoldable ? foldCount : undefined)
   return (
-    <div
-      className={`min-h-full @container ${
-        max === 2
-          ? "grid sm:grid-cols-2"
-          : max === 3
-            ? "grid sm:grid-cols-2 md:grid-cols-3"
-            : "flex flex-col"
-      }  gap-x-4 gap-y-1`}
-    >
-      {actions?.map((action) => (
-        <ActionLine
-          key={action.id}
-          action={action}
-          categories={categories}
-          states={states}
-          priorities={priorities}
-          showCategory={showCategory}
-          client={
-            clients
-              ? clients.find((client) => client.id === action.client_id)
-              : undefined
-          }
-          date={date}
-          onDrag={onDrag}
-        />
-      ))}
-    </div>
+    <>
+      <div
+        className={`min-h-full @container ${
+          max === 2
+            ? "grid sm:grid-cols-2"
+            : max === 3
+              ? "grid sm:grid-cols-2 md:grid-cols-3"
+              : "flex flex-col"
+        }  gap-x-4 gap-y-1`}
+      >
+        {actions
+          ?.slice(0, fold)
+          .map((action) => (
+            <ActionLine
+              key={action.id}
+              action={action}
+              categories={categories}
+              states={states}
+              priorities={priorities}
+              showCategory={showCategory}
+              client={
+                clients
+                  ? clients.find((client) => client.id === action.client_id)
+                  : undefined
+              }
+              date={date}
+              onDrag={onDrag}
+            />
+          ))}
+      </div>
+      {actions && isFoldable && actions.length > foldCount ? (
+        <div className="p-4 text-center">
+          <Toggle
+            size={"sm"}
+            onChange={(isPressed) => {
+              console.log({ isPressed })
+              setFold(isPressed ? undefined : foldCount)
+            }}
+          >
+            {fold ? (
+              <>
+                <span>Exibir todos</span>
+                <ExpandIcon className="size-4" />
+              </>
+            ) : (
+              <>
+                <span>Exibir menos</span>
+                <ShrinkIcon className="size-4" />
+              </>
+            )}
+          </Toggle>
+        </div>
+      ) : null}
+    </>
   )
 }
 

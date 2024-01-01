@@ -3,9 +3,9 @@ import { useLoaderData, useMatches } from "@remix-run/react"
 import invariant from "tiny-invariant"
 import { BlockOfActions, ListOfActions } from "~/components/structure/Action"
 import {
+  getActionsForThisDay,
   getDelayedActions,
   getNotFinishedActions,
-  getTodayActions,
 } from "~/lib/helpers"
 import { SupabaseServerClient } from "~/lib/supabase"
 
@@ -35,7 +35,7 @@ export default function Actions() {
   invariant(actions)
 
   const lateActions = getDelayedActions({ actions })
-  const todayActions = getTodayActions({ actions })
+  const todayActions = getActionsForThisDay({ actions })
   const notFinishedActions = getNotFinishedActions({ actions })
 
   return (

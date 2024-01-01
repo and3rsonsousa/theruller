@@ -1,5 +1,5 @@
 import { useFetchers } from "@remix-run/react"
-import { isAfter, isBefore, isToday, parseISO } from "date-fns"
+import { isAfter, isBefore, isSameDay, parseISO } from "date-fns"
 import {
   CircleDashedIcon,
   Code2Icon,
@@ -104,11 +104,18 @@ export function AvatarClient({
   )
 }
 
-export function sortActions(actions?: Action[] | null) {
+export function sortActions(
+  actions?: Action[] | null,
+  order: "asc" | "desc" = "asc"
+) {
   return actions
     ? actions
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-        .sort((a, b) => Number(b.state_id) - Number(a.state_id))
+        .sort((a, b) =>
+          order === "desc"
+            ? Number(b.state_id) - Number(a.state_id)
+            : Number(a.state_id) - Number(b.state_id)
+        )
     : null
 }
 
@@ -161,9 +168,17 @@ export function getUrgentActions(actions: Action[] | null) {
     : []
 }
 
-export function getTodayActions({ actions }: { actions?: Action[] | null }) {
+export function getActionsForThisDay({
+  actions,
+  date,
+}: {
+  actions?: Action[] | null
+  date?: Date
+}) {
+  const currentDate = date || new Date()
+
   return actions
-    ? actions.filter((action) => isToday(parseISO(action.date)))
+    ? actions.filter((action) => isSameDay(parseISO(action.date), currentDate))
     : []
 }
 

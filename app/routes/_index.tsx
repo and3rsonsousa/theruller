@@ -1,7 +1,7 @@
 import type { MetaFunction } from "@remix-run/node"
 
 import { LogInIcon } from "lucide-react"
-import { SpectrumLink } from "~/components/ui/spectrum/Spectrum"
+import { SpectrumLink } from "~/components/ui/Spectrum"
 
 export const meta: MetaFunction = () => {
   return [

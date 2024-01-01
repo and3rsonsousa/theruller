@@ -1,5 +1,5 @@
 import { Group, Input, Label, NumberField } from "react-aria-components"
-import { Button } from "~/components/ui/spectrum/Spectrum"
+import { Button } from "~/components/ui/Spectrum"
 
 export default function UI() {
   return (

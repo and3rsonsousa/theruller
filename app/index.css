@@ -222,13 +222,19 @@
     inset 0 1px 4px 0 #ffffff44;
 }
 
+[data-selected].highlight-selected {
+  box-shadow:
+    inset 0 1px 1px 0 #ffffff66,
+    inset 0 4px 12px 0 #ffffff33;
+}
+
 .button-primary {
   background-size: auto;
   background-position: center top;
   background-image: linear-gradient(
     to bottom,
     #9900ff 0%,
-    #0000ff66 35%,
+    #ff6633 35%,
     #9900ff00 80%
   );
 }

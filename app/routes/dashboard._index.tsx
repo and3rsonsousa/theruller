@@ -1,21 +1,23 @@
 import { LoaderFunctionArgs, MetaFunction, json } from "@remix-run/node"
 import { Link, useLoaderData, useMatches } from "@remix-run/react"
+import { addDays, addMonths, format, isSameMonth, isThisMonth } from "date-fns"
+import { ptBR } from "date-fns/locale"
 import { LaughIcon } from "lucide-react"
 import { useState } from "react"
 import invariant from "tiny-invariant"
 import { BlockOfActions, ListOfActions } from "~/components/structure/Action"
 import CreateAction from "~/components/structure/CreateAction"
+import { Toggle } from "~/components/ui/Spectrum"
 import { ScrollArea } from "~/components/ui/ui/scroll-area"
-import { Toggle } from "~/components/ui/ui/toggle"
 import { FINISHED_ID } from "~/lib/constants"
 import {
   AvatarClient,
+  getActionsForThisDay,
   getDelayedActions,
   getNotFinishedActions,
-  getTodayActions,
   sortActions,
-  usePendingActions,
   useIDsToRemove,
+  usePendingActions,
 } from "~/lib/helpers"
 import { SupabaseServerClient } from "~/lib/supabase"
 
@@ -66,7 +68,11 @@ export default function DashboardIndex() {
   actions = sortActions(Array.from(_actions, ([, v]) => v))
 
   const lateActions = getDelayedActions({ actions: actions as Action[] })
-  const todayActions = getTodayActions({ actions })
+  const todayActions = getActionsForThisDay({ actions })
+  const tomorrowActions = getActionsForThisDay({
+    actions,
+    date: addDays(new Date(), 1),
+  })
   const notFinishedActions = getNotFinishedActions({ actions })
 
   return (
@@ -76,8 +82,8 @@ export default function DashboardIndex() {
         {/* Ações em Atraso */}
         {lateActions?.length ? (
           <div className="mb-8">
-            <div className="flex justify-between py-2">
-              <h2 className="text-xl font-medium">
+            <div className="flex justify-between py-8">
+              <h2 className="text-3xl font-medium tracking-tight">
                 Atrasados ({lateActions?.length})
               </h2>
             </div>
@@ -96,8 +102,8 @@ export default function DashboardIndex() {
         ) : null}
         {/* Clientes - Parceiros - Contas */}
         <div className="mb-8">
-          <h2 className="mb-4 text-xl font-medium">Contas</h2>
-          <div className="flex flex-wrap justify-between gap-4">
+          <h4 className="mb-4 text-xl font-medium">Contas</h4>
+          <div className="flow flex flex-wrap justify-center gap-4">
             {clients.map((client) => (
               <Link to={`/dashboard/${client.slug}`} key={client.id}>
                 <AvatarClient client={client} size="lg" />
@@ -108,15 +114,19 @@ export default function DashboardIndex() {
         {/* Ações de Hoje */}
         {todayActions?.length ? (
           <div className="mb-8">
-            <div className="flex justify-between py-2">
-              <h2 className="text-xl font-medium">
+            <div className="flex justify-between py-8">
+              <h2 className="text-3xl font-medium tracking-tight">
                 Hoje ({todayActions?.length})
               </h2>
               <div>
-                <Toggle pressed={allActions} onPressedChange={setAllActions}>
+                <Toggle
+                  aria-pressed={allActions}
+                  size={"sm"}
+                  onChange={setAllActions}
+                >
                   {allActions
-                    ? "Apenas ações não finalizadas"
-                    : "Mostrar todas"}
+                    ? "Exibir apenas as não conluídas"
+                    : "Exibir ações concluídas"}
                 </Toggle>
               </div>
             </div>
@@ -151,24 +161,88 @@ export default function DashboardIndex() {
             </div>
           </div>
         )}
+        {/* Ações de Amanhã */}
+        {tomorrowActions?.length ? (
+          <div className="mb-8">
+            <div className="flex justify-between py-2">
+              <h2 className="text-xl font-medium">
+                Amanhã ({tomorrowActions?.length})
+              </h2>
+            </div>
+
+            {tomorrowActions ? (
+              <ListOfActions
+                categories={categories}
+                priorities={priorities}
+                states={states}
+                actions={tomorrowActions}
+                clients={clients}
+                max={2}
+                date={{
+                  dateFormat: 0,
+                  timeFormat: 1,
+                }}
+              />
+            ) : null}
+          </div>
+        ) : (
+          <div className="grid place-content-center p-8 text-xl">
+            <div className="space-y-4 rounded-lg bg-gray-900 p-8 text-center">
+              <div>Nenhuma ação para hoje</div>
+              <CreateAction mode="button" />
+            </div>
+          </div>
+        )}
 
         <div className="mb-8">
-          <div className="flex justify-between py-2">
-            <h2 className="text-xl font-medium">
+          <div className="flex justify-between pb-4 pt-8">
+            <h2 className="text-3xl font-medium tracking-tight">
               Próximas Ações ({notFinishedActions?.length})
             </h2>
           </div>
+          {/* Nesse Mês */}
+          <>
+            <h4 className="pb-4 text-xl font-medium tracking-tight">
+              Nesse Mês
+            </h4>
 
-          <ListOfActions
-            categories={categories}
-            priorities={priorities}
-            states={states}
-            actions={notFinishedActions}
-            showCategory={true}
-            max={3}
-            date={{ dateFormat: 1 }}
-            clients={clients}
-          />
+            <ListOfActions
+              categories={categories}
+              priorities={priorities}
+              states={states}
+              actions={notFinishedActions.filter((action) =>
+                isThisMonth(action.date)
+              )}
+              showCategory={true}
+              max={3}
+              date={{ dateFormat: 2, timeFormat: 1 }}
+              clients={clients}
+              isFoldable={true}
+            />
+          </>
+
+          <>
+            <h4 className="py-4 text-xl font-medium tracking-tight">
+              <span className="capitalize">
+                {format(addMonths(new Date(), 1), "MMMM", { locale: ptBR })}
+              </span>
+              {format(addMonths(new Date(), 1), " 'de' yyyy", { locale: ptBR })}
+            </h4>
+
+            <ListOfActions
+              categories={categories}
+              priorities={priorities}
+              states={states}
+              actions={notFinishedActions.filter((action) =>
+                isSameMonth(action.date, addMonths(new Date(), 1))
+              )}
+              showCategory={true}
+              max={3}
+              date={{ dateFormat: 2, timeFormat: 1 }}
+              clients={clients}
+              isFoldable={true}
+            />
+          </>
         </div>
       </ScrollArea>
     </div>

@@ -9,6 +9,8 @@ import {
   MenuItemProps,
   Popover as SpectrumPopover,
   PopoverProps,
+  ToggleButtonProps,
+  ToggleButton,
 } from "react-aria-components"
 import { cn } from "~/lib/utils"
 
@@ -31,34 +33,12 @@ type SpectrumButtonType = ButtonProps & {
   size?: "sm" | "md" | "lg" | "icon-sm" | "icon" | "icon-lg" | null
   children?: ReactNode
 }
+type SpectrumToggleType = ToggleButtonProps & {
+  size?: "sm" | "md" | "lg" | "icon-sm" | "icon" | "icon-lg" | null
+  children?: ReactNode
+}
 
 export function Button(props: SpectrumButtonType) {
-  const classNames = cva(
-    "inline-flex highlight text-center font-medium text-white cursor-pointer outline-none items-center bg-gradient-to-b gap-2 transition-all rounded-md bg-[center_bottom] bg-[length:500px_130%] hover:bg-[length:500px_100%] from-white/30 via-transparent  leading-none back pressed:scale-95",
-    {
-      variants: {
-        variant: {
-          primary: "pressed:bg-primary/90 button-primary",
-          default: "",
-          ghost:
-            "no-highlight bg-[length:500px_200%] hover:highlight pressed:bg-gray-900",
-        },
-        size: {
-          sm: "px-4 py-3 text-sm",
-          md: "px-5 py-4",
-          lg: "px-8 py-5 text-xl",
-          "icon-sm": "p-0 size-10 inline-grid place-content-center",
-          icon: "p-0 size-12 inline-grid place-content-center",
-          "icon-lg": "p-0 size-16 inline-grid place-content-center",
-        },
-      },
-      defaultVariants: {
-        variant: "default",
-        size: "md",
-      },
-    }
-  )
-
   return (
     <SpectrumButton
       {...props}
@@ -70,6 +50,21 @@ export function Button(props: SpectrumButtonType) {
     >
       {props.children}
     </SpectrumButton>
+  )
+}
+
+export function Toggle(props: SpectrumToggleType) {
+  return (
+    <ToggleButton
+      {...props}
+      className={classNames({
+        variant: "ghost",
+        size: props.size,
+        className: cn([props.className, "highlight-selected"]),
+      })}
+    >
+      {props.children}
+    </ToggleButton>
   )
 }
 
@@ -99,3 +94,29 @@ export function MenuItem(props: MenuItemProps) {
     </SpectrumMenuItem>
   )
 }
+
+const classNames = cva(
+  "inline-flex highlight text-center font-medium text-white cursor-pointer outline-none items-center bg-gradient-to-b gap-2 transition-all rounded-md bg-[center_bottom] bg-[length:500px_130%] hover:bg-[length:500px_100%] from-white/30 via-transparent  leading-none back pressed:scale-95",
+  {
+    variants: {
+      variant: {
+        primary: "pressed:bg-primary/90 button-primary",
+        default: "",
+        ghost:
+          "no-highlight bg-[length:500px_200%] hover:highlight pressed:bg-gray-900",
+      },
+      size: {
+        sm: "px-4 py-3 text-sm",
+        md: "px-5 py-4",
+        lg: "px-8 py-5 text-xl",
+        "icon-sm": "p-0 size-10 inline-grid place-content-center",
+        icon: "p-0 size-12 inline-grid place-content-center",
+        "icon-lg": "p-0 size-16 inline-grid place-content-center",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "md",
+    },
+  }
+)

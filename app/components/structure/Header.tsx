@@ -6,7 +6,7 @@ import {
   useNavigation,
 } from "@remix-run/react"
 import { Menu, MenuTrigger, Separator } from "react-aria-components"
-import { Button, MenuItem, Popover } from "../ui/spectrum/Spectrum"
+import { Button, MenuItem, Popover } from "../ui/Spectrum"
 
 export default function Header() {
   // const { supabase } = useOutletContext<OutletContextType>()
