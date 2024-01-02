@@ -365,10 +365,10 @@ export function ActionGrid({
     <ContextMenu>
       <ContextMenuTrigger>
         <div
-          className={`group/action highlight-soft relative flex aspect-square select-none flex-col items-center justify-between rounded-xl from-white/5  p-4 hover:bg-gradient-to-b ${
+          className={`group/action relative flex aspect-square select-none flex-col items-center justify-between rounded-xl from-white/5  p-4 hover:bg-gradient-to-b ${
             action.state_id === FINISHED_ID
-              ? "bg-gray-900/50 text-gray-500"
-              : "bg-gray-800"
+              ? " bg-gray-900/50 "
+              : "highlight-soft bg-gray-800 text-gray-500"
           }`}
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}

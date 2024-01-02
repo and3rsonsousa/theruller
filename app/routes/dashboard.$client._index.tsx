@@ -317,7 +317,7 @@ export default function Client() {
       </div>
       <div
         id="calendar"
-        className={`grid-cols-7 md:grid ${
+        className={`grid-cols-7 text-gray-300 md:grid ${
           calendar.length === 35 ? "grid-rows-5" : "grid-rows-6"
         }`}
       >
@@ -341,13 +341,13 @@ export default function Client() {
 
             <div className="my-1 flex justify-between">
               <div
-                className={`grid h-6 w-6 place-content-center rounded-full text-xs ${
-                  isToday(day.date) ? "bg-primary" : "-ml-1"
+                className={`grid h-6 w-6 place-content-center rounded-full text-xs font-medium ${
+                  isSameMonth(day.date, currentDate) ? "" : "text-gray-700"
                 } ${
-                  isSameMonth(day.date, currentDate)
-                    ? "font-medium"
-                    : "text-gray-700"
-                }`}
+                  isToday(day.date)
+                    ? "bg-primary text-primary-foreground"
+                    : "-ml-1"
+                } `}
               >
                 {day.date.getDate()}
               </div>

@@ -3,9 +3,17 @@ import { Link, useLoaderData, useMatches, useSubmit } from "@remix-run/react"
 import { format, formatDistanceToNow, parseISO } from "date-fns"
 
 import { ptBR } from "date-fns/locale"
-import { CalendarDaysIcon, CalendarIcon, ListTodoIcon } from "lucide-react"
+import {
+  CalendarDaysIcon,
+  CalendarIcon,
+  Grid3X3Icon,
+  ListTodoIcon,
+} from "lucide-react"
 import { useState } from "react"
-import { Button as SpectrumButton } from "~/components/ui/Spectrum"
+import {
+  Button as SpectrumButton,
+  SpectrumLink,
+} from "~/components/ui/Spectrum"
 import { Avatar, AvatarImage } from "~/components/ui/ui/avatar"
 import { Button } from "~/components/ui/ui/button"
 import { Calendar } from "~/components/ui/ui/calendar"
@@ -131,16 +139,27 @@ export default function ActionPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size={"icon"} asChild>
-            <Link to={`/dashboard/${client.slug}/actions`}>
-              <ListTodoIcon className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button variant="ghost" size={"icon"} asChild>
-            <Link to={`/dashboard/${client.slug}/calendar`}>
-              <CalendarDaysIcon className="h-4 w-4" />
-            </Link>
-          </Button>
+          <SpectrumLink
+            href={`/dashboard/${client.slug}/actions`}
+            size={"icon-sm"}
+            variant="ghost"
+          >
+            <ListTodoIcon className="h-4 w-4" />
+          </SpectrumLink>
+          <SpectrumLink
+            href={`/dashboard/${client.slug}/instagram`}
+            size={"icon-sm"}
+            variant="ghost"
+          >
+            <Grid3X3Icon className="h-4 w-4" />
+          </SpectrumLink>
+          <SpectrumLink
+            href={`/dashboard/${client.slug}/calendar`}
+            size={"icon-sm"}
+            variant="ghost"
+          >
+            <CalendarDaysIcon className="h-4 w-4" />
+          </SpectrumLink>
         </div>
       </div>
 

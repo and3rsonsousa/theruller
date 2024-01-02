@@ -1,31 +1,25 @@
 import { cva } from "class-variance-authority"
 import { ReactNode } from "react"
 import {
-  Button as SpectrumButton,
   ButtonProps,
   Link,
   LinkProps,
-  MenuItem as SpectrumMenuItem,
   MenuItemProps,
-  Popover as SpectrumPopover,
   PopoverProps,
-  ToggleButtonProps,
+  Button as SpectrumButton,
+  Dialog as SpectrumDialog,
+  MenuItem as SpectrumMenuItem,
+  Modal as SpectrumModal,
+  Popover as SpectrumPopover,
   ToggleButton,
+  ToggleButtonProps,
 } from "react-aria-components"
 import { cn } from "~/lib/utils"
 
-export function SpectrumLink(props: LinkProps) {
-  return (
-    <Link
-      {...props}
-      className={cn(
-        "highlight pressed:highlight-down inline-flex cursor-pointer items-center gap-2 rounded-md px-5 py-3 text-center  outline-none ring-primary ring-offset-2 ring-offset-background transition pressed:scale-95 pressed:bg-primary/50",
-        props.className
-      )}
-    >
-      {props.children}
-    </Link>
-  )
+type SpectrumLinkType = LinkProps & {
+  variant?: "primary" | "default" | "ghost" | null
+  size?: "sm" | "md" | "lg" | "icon-sm" | "icon" | "icon-lg" | null
+  children?: ReactNode
 }
 
 type SpectrumButtonType = ButtonProps & {
@@ -33,9 +27,25 @@ type SpectrumButtonType = ButtonProps & {
   size?: "sm" | "md" | "lg" | "icon-sm" | "icon" | "icon-lg" | null
   children?: ReactNode
 }
+
 type SpectrumToggleType = ToggleButtonProps & {
   size?: "sm" | "md" | "lg" | "icon-sm" | "icon" | "icon-lg" | null
   children?: ReactNode
+}
+
+export function SpectrumLink(props: SpectrumLinkType) {
+  return (
+    <Link
+      {...props}
+      className={classNames({
+        variant: props.variant,
+        size: props.size,
+        className: props.className,
+      })}
+    >
+      {props.children}
+    </Link>
+  )
 }
 
 export function Button(props: SpectrumButtonType) {
@@ -65,6 +75,34 @@ export function Toggle(props: SpectrumToggleType) {
     >
       {props.children}
     </ToggleButton>
+  )
+}
+
+export function Modal({
+  children,
+  open,
+  onOpenChange,
+}: {
+  children: ReactNode
+  open?: boolean
+  onOpenChange?: (isOpen: boolean) => void
+}) {
+  return (
+    <SpectrumModal
+      className={
+        "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2"
+      }
+      onOpenChange={onOpenChange}
+      isOpen={open}
+      isDismissable={true}
+    >
+      <SpectrumDialog
+        aria-label="search"
+        className="max-w-xl rounded-md outline-none sm:w-96"
+      >
+        {children}
+      </SpectrumDialog>
+    </SpectrumModal>
   )
 }
 
