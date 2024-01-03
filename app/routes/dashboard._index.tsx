@@ -81,7 +81,7 @@ export default function DashboardIndex() {
         <div className="pt-16"></div>
         {/* Ações em Atraso */}
         {lateActions?.length ? (
-          <div className="mb-8">
+          <div className="mb-4">
             <div className="flex justify-between py-8">
               <h2 className="text-3xl font-medium tracking-tight">
                 Atrasados ({lateActions?.length})
@@ -101,7 +101,7 @@ export default function DashboardIndex() {
           </div>
         ) : null}
         {/* Clientes - Parceiros - Contas */}
-        <div className="mb-8">
+        <div className="mb-8 mt-4">
           <h4 className="mb-4 text-xl font-medium">Contas</h4>
           <div className="flow flex flex-wrap justify-center gap-4">
             {clients.map((client) => (

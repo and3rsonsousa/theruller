@@ -640,9 +640,8 @@ function ShortcutActions({ action }: { action: Action }) {
           priority_id: PRIORITIES.high,
         })
       } else if (key === "h") {
-        const date = parseISO(action.date)
-        date.setDate(new Date().getDate())
-        date.setHours(new Date().getHours() + 1)
+        const date = new Date()
+        date.setHours(date.getHours() + 1)
 
         handleActions({
           ...action,

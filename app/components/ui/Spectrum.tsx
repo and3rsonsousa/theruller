@@ -5,6 +5,7 @@ import {
   Link,
   LinkProps,
   MenuItemProps,
+  ModalOverlay,
   PopoverProps,
   Button as SpectrumButton,
   Dialog as SpectrumDialog,
@@ -88,21 +89,35 @@ export function Modal({
   onOpenChange?: (isOpen: boolean) => void
 }) {
   return (
-    <SpectrumModal
-      className={
-        "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2"
-      }
+    <ModalOverlay
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-background/50 backdrop-blur entering:animate-in entering:fade-in-0 exiting:animate-out exiting:fade-out-0"
       onOpenChange={onOpenChange}
       isOpen={open}
       isDismissable={true}
     >
-      <SpectrumDialog
-        aria-label="search"
-        className="max-w-xl rounded-md outline-none sm:w-96"
+      <SpectrumModal
+        className={({ isEntering, isExiting }) =>
+          `${
+            isEntering
+              ? "duration-700 ease-out animate-in fade-in-0 zoom-in-75"
+              : ""
+          }${
+            isExiting
+              ? "duration-200 ease-in animate-out fade-out-0 zoom-out-75"
+              : ""
+          }`
+        }
+        onOpenChange={onOpenChange}
+        isOpen={open}
       >
-        {children}
-      </SpectrumDialog>
-    </SpectrumModal>
+        <SpectrumDialog
+          aria-label="search"
+          className="max-w-xl rounded-md outline-none  sm:w-96"
+        >
+          {children}
+        </SpectrumDialog>
+      </SpectrumModal>
+    </ModalOverlay>
   )
 }
 
