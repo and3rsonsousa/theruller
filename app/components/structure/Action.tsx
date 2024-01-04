@@ -474,7 +474,6 @@ export function ListOfActions({
           <Toggle
             size={"sm"}
             onChange={(isPressed) => {
-              console.log({ isPressed })
               setFold(isPressed ? undefined : foldCount)
             }}
           >

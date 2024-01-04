@@ -489,9 +489,7 @@ export default function ActionPage() {
 
           <div>
             <SpectrumButton
-              onPress={(e) => {
-                console.log(e.shiftKey)
-
+              onPress={() => {
                 handleActions({
                   ...action,
                   responsibles: action.responsibles,

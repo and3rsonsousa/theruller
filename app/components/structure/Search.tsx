@@ -1,23 +1,44 @@
 /* eslint-disable jsx-a11y/no-autofocus */
+import { useMatches } from "@remix-run/react"
+import { createBrowserClient } from "@supabase/ssr"
 import { useEffect, useState } from "react"
 import {
+  Collection,
   ComboBox,
+  Header,
   Input,
   ListBox,
   ListBoxItem,
   Popover,
+  Section,
 } from "react-aria-components"
-import { useDebounce } from "use-debounce"
 import { Modal } from "../ui/Spectrum"
-import { useMatches } from "@remix-run/react"
-import { createBrowserClient } from "@supabase/ssr"
 
 export default function Search() {
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState("")
-  const [query] = useDebounce(value, 500)
-  const [items, setItems] = useState<{ actions: Action[] }>()
   const matches = useMatches()
+  const clients = (matches[1].data as DashboardDataType).clients
+
+  const [sections, setSections] = useState<
+    Array<{
+      name: string
+      items: { id: string | number; title: string; href: string }[]
+    }>
+  >([
+    {
+      name: "Parceiros",
+      items: clients.map((client) => ({
+        id: client.id,
+        title: client.title,
+        href: `/dashboard/${client.slug}`,
+      })),
+    },
+    {
+      name: "Ações",
+      items: [],
+    },
+  ])
 
   const { env } = matches[0].data as {
     env: { SUPABASE_URL: string; SUPABASE_ANON_KEY: string }
@@ -38,39 +59,59 @@ export default function Search() {
   }, [])
 
   useEffect(() => {
-    if (query.length > 2) {
-      console.log(query)
+    if (supabase) {
       supabase
-        .rpc("search_for_actions", { query: `%${query}%` })
+        .from("actions")
         .select("*")
         .then((value) => {
-          setItems({ actions: value.data as Action[] })
+          const s = sections
+          const actions = value.data
+            ? value.data.map((action: Action) => ({
+                id: action.id,
+                title: action.title,
+                href: `/dashboard/action/${action.id}`,
+              }))
+            : []
+          s[1].items = actions
+          setSections(s)
         })
     }
-  }, [query, supabase])
+  }, [supabase])
 
   return (
     <Modal open={open} onOpenChange={setOpen}>
-      <ComboBox className="relative rounded-md" aria-label="Search">
+      <ComboBox className="relative w-96 rounded-md" aria-label="Search">
         <Input
-          className={`w-full rounded-md bg-background/50 px-6 py-4 text-xl font-light antialiased outline-none ring-2 ring-primary backdrop-blur-xl `}
+          className={`w-full rounded-md bg-background px-6 py-4 text-xl font-light antialiased outline-none ring-2 ring-primary  `}
           value={value}
           onChange={(event) => setValue(event.target.value)}
           autoFocus={true}
         />
 
-        <pre>{JSON.stringify(items)}</pre>
-
-        <Popover className="top-0 -mt-1 w-[--trigger-width] rounded-md bg-background/50 p-2 ring-1 ring-white/10 backdrop-blur-xl entering:animate-in entering:slide-out-to-bottom-2">
-          <ListBox>
-            {items?.actions.map((action) => (
-              <ListBoxItem
-                className="rounded-sm px-4 py-2 text-sm font-medium text-gray-500 transition focus:bg-primary focus:text-primary-foreground"
-                key={action.id}
-              >
-                {action.title}
-              </ListBoxItem>
-            ))}
+        <Popover className="scrollbars scrollbars-thin  top-0 -mt-1 w-[--trigger-width] overflow-auto rounded-md bg-background/50 p-2 ring-1 ring-white/10 backdrop-blur-xl entering:animate-in entering:slide-out-to-bottom-2">
+          <ListBox
+            items={sections}
+            onAction={(key) => {
+              console.log({ key })
+            }}
+            selectionBehavior="toggle"
+          >
+            {(section) => (
+              <Section id={section.name}>
+                <Header className="px-4 py-2">{section.name}</Header>
+                <Collection items={section.items}>
+                  {(item) => (
+                    <ListBoxItem
+                      className="block w-full rounded-sm px-4 py-2 text-sm text-gray-400 transition focus:bg-primary focus:text-primary-foreground"
+                      key={item.id}
+                      href={item.href}
+                    >
+                      {item.title}
+                    </ListBoxItem>
+                  )}
+                </Collection>
+              </Section>
+            )}
           </ListBox>
         </Popover>
       </ComboBox>

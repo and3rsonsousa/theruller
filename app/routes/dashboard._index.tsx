@@ -1,12 +1,23 @@
 import { LoaderFunctionArgs, MetaFunction, json } from "@remix-run/node"
 import { Link, useLoaderData, useMatches } from "@remix-run/react"
-import { addDays, addMonths, format, isSameMonth, isThisMonth } from "date-fns"
+import {
+  addDays,
+  addMonths,
+  endOfDay,
+  endOfMonth,
+  format,
+  isSameMonth,
+  isThisMonth,
+  startOfDay,
+  startOfMonth,
+} from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { LaughIcon } from "lucide-react"
 import { useState } from "react"
 import invariant from "tiny-invariant"
 import { BlockOfActions, ListOfActions } from "~/components/structure/Action"
 import CreateAction from "~/components/structure/CreateAction"
+import Progress from "~/components/structure/Progress"
 import { Toggle } from "~/components/ui/Spectrum"
 import { ScrollArea } from "~/components/ui/ui/scroll-area"
 import { FINISHED_ID } from "~/lib/constants"
@@ -24,7 +35,17 @@ import { SupabaseServerClient } from "~/lib/supabase"
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { headers, supabase } = SupabaseServerClient({ request })
 
-  const { data: actions } = await supabase.from("actions").select("*")
+  const { data: actions } = await supabase
+    .from("actions")
+    .select("*")
+    .gte(
+      "date",
+      format(startOfDay(startOfMonth(new Date())), "yyyy-MM-dd HH:mm:ss")
+    )
+    .lte(
+      "date",
+      format(endOfDay(endOfMonth(new Date())), "yyyy-MM-dd HH:mm:ss")
+    )
 
   return json({ actions }, { headers })
 }
@@ -79,6 +100,19 @@ export default function DashboardIndex() {
     <div className="container overflow-hidden">
       <ScrollArea className="h-full w-full px-4 md:px-8">
         <div className="pt-16"></div>
+        <Progress
+          className={"mt-4"}
+          values={states
+            // .filter((state) => state.id !== FINISHED_ID)
+            .map((state) => ({
+              id: state.id,
+              title: state.title,
+              value: actions?.filter((action) => action.state_id === state.id)
+                .length,
+              color: `bg-${state.slug}`,
+            }))}
+          total={actions?.length}
+        />
         {/* Ações em Atraso */}
         {lateActions?.length ? (
           <div className="mb-4">

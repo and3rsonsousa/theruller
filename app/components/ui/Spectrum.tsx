@@ -90,7 +90,7 @@ export function Modal({
 }) {
   return (
     <ModalOverlay
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-background/50 backdrop-blur entering:animate-in entering:fade-in-0 exiting:animate-out exiting:fade-out-0"
+      className="fixed inset-0 z-50 flex items-center justify-center "
       onOpenChange={onOpenChange}
       isOpen={open}
       isDismissable={true}
@@ -99,21 +99,18 @@ export function Modal({
         className={({ isEntering, isExiting }) =>
           `${
             isEntering
-              ? "duration-700 ease-out animate-in fade-in-0 zoom-in-75"
+              ? "duration-200 ease-out animate-in fade-in-0 zoom-in-95"
               : ""
           }${
             isExiting
-              ? "duration-200 ease-in animate-out fade-out-0 zoom-out-75"
+              ? "duration-100 ease-in animate-out fade-out-0 zoom-out-95"
               : ""
           }`
         }
         onOpenChange={onOpenChange}
         isOpen={open}
       >
-        <SpectrumDialog
-          aria-label="search"
-          className="max-w-xl rounded-md outline-none  sm:w-96"
-        >
+        <SpectrumDialog aria-label="search" className="rounded-md outline-none">
           {children}
         </SpectrumDialog>
       </SpectrumModal>

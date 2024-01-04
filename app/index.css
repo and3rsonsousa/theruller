@@ -81,7 +81,7 @@
   @apply bg-done-600 text-done-100;
 }
 .bg-finished {
-  @apply bg-finished-600 text-finished-100;
+  @apply bg-finished-500 text-finished-100;
 }
 
 .border-idea {
@@ -189,6 +189,9 @@
 .scrollbars::-webkit-scrollbar {
   @apply mr-4 block w-2;
 }
+.scrollbars-thin::-webkit-scrollbar {
+  @apply mr-4 block w-1;
+}
 .scrollbars::-webkit-scrollbar-button {
   @apply hidden;
 }
@@ -200,7 +203,7 @@
   @apply mr-4 bg-transparent;
 }
 .scrollbars::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-gray-700 outline-black/10 backdrop-blur-lg;
+  @apply rounded-full bg-gray-300/15 outline-black/10 backdrop-blur-lg;
 }
 
 .highlight {
