@@ -17,7 +17,7 @@ export default function Progress(props: {
   return (
     <div
       className={cn(
-        "flex h-2 w-full overflow-hidden rounded-full bg-muted",
+        " flex h-1 w-full overflow-hidden rounded-full bg-muted",
         props.className
       )}
     >
@@ -29,7 +29,7 @@ export default function Progress(props: {
             <div
               key={item.id}
               style={{ width: percentage + "%" }}
-              className={cn("h-2 flex-shrink grow-0 bg-primary", item.color)}
+              className={cn("h-full flex-shrink grow-0 bg-primary", item.color)}
             ></div>
           )
         }

@@ -1,4 +1,3 @@
-import { Group, Input, Label, NumberField } from "react-aria-components"
 import { Button } from "~/components/ui/Spectrum"
 
 export default function UI() {
@@ -43,14 +42,10 @@ export default function UI() {
         </div>
       </div>
       <div>
-        <NumberField>
-          <Label>Width</Label>
-          <Group>
-            <Input />
-            <Button slot="increment">+</Button>
-            <Button slot="decrement">-</Button>
-          </Group>
-        </NumberField>
+        <div className="bg-neutral p-8">
+          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Deleniti id
+          aliquid autem.
+        </div>
       </div>
     </div>
   )

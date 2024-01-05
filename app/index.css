@@ -26,6 +26,19 @@
     --input: 220 13% 91%;
     --ring: 262.1 83.3% 57.8%;
     --radius: 1rem;
+
+    --neutral-1: #15031f;
+    --neutral-2: #271834;
+    --neutral-3: #3a2e49;
+    --neutral-4: #4c445e;
+    --neutral-5: #5f5b72;
+    --neutral-6: #737286;
+    --neutral-7: #88889a;
+    --neutral-8: #9f9fae;
+    --neutral-9: #b6b6c2;
+    --neutral-10: #cdced5;
+    --neutral-11: #e3e4e8;
+    --neutral-12: #fafafb;
   }
 
   .dark {
@@ -48,6 +61,19 @@
     --border: 215 27.9% 16.9%;
     --input: 215 27.9% 16.9%;
     --ring: 263.4 70% 50.4%;
+
+    --neutral-1: #15031f;
+    --neutral-2: #271834;
+    --neutral-3: #3a2e49;
+    --neutral-4: #4c445e;
+    --neutral-5: #5f5b72;
+    --neutral-6: #737286;
+    --neutral-7: #88889a;
+    --neutral-8: #9f9fae;
+    --neutral-9: #b6b6c2;
+    --neutral-10: #cdced5;
+    --neutral-11: #e3e4e8;
+    --neutral-12: #fafafb;
   }
 }
 
@@ -237,7 +263,7 @@
   background-image: linear-gradient(
     to bottom,
     #9900ff 0%,
-    #ff6633 35%,
+    #6600ff99 35%,
     #9900ff00 80%
   );
 }
