@@ -71,17 +71,17 @@ export default function Header() {
                 Sair
               </MenuItem>
               <Separator className="-mx-1 my-2 h-[1px] bg-white/20" />
-              <MenuItem id="partners" href="/dashboard/account">
+              <MenuItem id="partners" href="/dashboard/admin/clients">
                 Parceiros
               </MenuItem>
-              <MenuItem id="new-partner" href="/dashboard/account">
+              <MenuItem id="new-partner" href="/dashboard/admin/clients/new">
                 Novo parceiro
               </MenuItem>
               <Separator className="-mx-1 my-2 h-[1px] bg-white/20" />
-              <MenuItem id="users" href="/dashboard/account">
+              <MenuItem id="users" href="/dashboard/admin/users/">
                 Usuários
               </MenuItem>
-              <MenuItem id="new-user" href="/dashboard/account">
+              <MenuItem id="new-user" href="/dashboard/admin/users/new">
                 Novo usuário
               </MenuItem>
             </Menu>

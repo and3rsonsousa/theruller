@@ -4,8 +4,9 @@ import {
   json,
   redirect,
 } from "@remix-run/node"
-import { Link, Outlet, useLoaderData } from "@remix-run/react"
+import { Link, Outlet, useLoaderData, useMatches } from "@remix-run/react"
 import { CalendarDaysIcon, Grid3X3Icon, ListTodoIcon } from "lucide-react"
+import Progress from "~/components/structure/Progress"
 import { Button } from "~/components/ui/ui/button"
 import { ScrollArea } from "~/components/ui/ui/scroll-area"
 import { AvatarClient } from "~/lib/helpers"
@@ -38,8 +39,14 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 
 export default function Client() {
   const { client } = useLoaderData<typeof loader>()
+
+  const matches = useMatches()
+  const { states } = matches[1].data as DashboardDataType
+
+  const { actions } = matches[3].data as { actions: Action[] }
+
   return (
-    <div className="flex flex-col overflow-hidden">
+    <div className="flex flex-col overflow-y-hidden">
       <ScrollArea className="px-4 pb-4 md:px-8" id="scrollarea">
         <div className="pt-16"></div>
         <div className="flex justify-between pt-2">
@@ -49,7 +56,20 @@ export default function Client() {
           >
             <AvatarClient client={client} size="lg" />
             <div className="text-2xl font-medium tracking-tight">
-              {client?.title}
+              <div>{client?.title}</div>
+              <Progress
+                total={actions.length}
+                values={states
+                  // .filter((state) => state.id !== FINISHED_ID)
+                  .map((state) => ({
+                    id: state.id,
+                    title: state.title,
+                    value: actions?.filter(
+                      (action) => action.state_id === state.id
+                    ).length,
+                    color: `bg-${state.slug}`,
+                  }))}
+              />
             </div>
           </Link>
           <div className="flex items-center gap-2">
@@ -88,6 +108,7 @@ export default function Client() {
             </Button>
           </div>
         </div>
+
         <Outlet />
       </ScrollArea>
     </div>

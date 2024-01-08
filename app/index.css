@@ -92,19 +92,19 @@
 }
 
 .bg-idea {
-  @apply bg-idea-600 text-idea-100;
+  @apply bg-idea-500 text-idea-100;
 }
 .bg-do {
   @apply bg-do-600 text-do-100;
 }
 .bg-doing {
-  @apply bg-doing-600 text-doing-100;
+  @apply bg-doing-500 text-doing-100;
 }
 .bg-review {
-  @apply bg-review-600 text-review-100;
+  @apply bg-review-500 text-review-100;
 }
 .bg-done {
-  @apply bg-done-600 text-done-100;
+  @apply bg-done-500 text-done-100;
 }
 .bg-finished {
   @apply bg-finished-500 text-finished-100;
@@ -188,7 +188,7 @@
 }
 
 .bg-select-item {
-  @apply px-3 py-1 pl-8 text-xs font-light;
+  @apply px-3 py-1 pr-8 text-xs font-light;
 }
 
 .debug-1 {

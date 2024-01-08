@@ -1,4 +1,3 @@
-import invariant from "tiny-invariant"
 import { cn } from "~/lib/utils"
 
 export default function Progress(props: {
@@ -8,12 +7,9 @@ export default function Progress(props: {
     value?: number
     color?: string
   }[]
-  total?: number
+  total: number
   className?: string
 }) {
-  const total = props.total
-  invariant(total)
-
   return (
     <div
       className={cn(
@@ -23,7 +19,7 @@ export default function Progress(props: {
     >
       {props.values.map((item) => {
         if (item.value) {
-          const percentage = (item.value / total) * 100
+          const percentage = (item.value / props.total) * 100
 
           return (
             <div

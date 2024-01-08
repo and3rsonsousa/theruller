@@ -30,11 +30,11 @@ export default function Actions() {
   const instagramActions = getInstagramActions({ actions })
 
   return (
-    <div className="container flex gap-8">
-      <div className="w-1/2">
+    <div className="container flex h-full gap-8 overflow-hidden">
+      <div className="mt-2 w-1/2">
         <div className="mb-8">
           <div className="flex justify-between py-2">
-            <h2 className="text-xl font-medium">
+            <h2 className="mb-2 text-xl font-medium">
               Ações para o Instagram ({instagramActions?.length})
             </h2>
           </div>
@@ -48,7 +48,7 @@ export default function Actions() {
           />
         </div>
       </div>
-      <div className="w-1/2">
+      <div className="mt-4 w-1/2">
         <GridOfActions
           categories={categories}
           priorities={priorities}

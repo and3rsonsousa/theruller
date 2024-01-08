@@ -33,6 +33,7 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "../ui/ui/context-menu"
+import { cn } from "~/lib/utils"
 
 export function ActionLine({
   action,
@@ -339,11 +340,13 @@ export function ActionGrid({
   states,
   categories,
   priorities,
+  classNames,
 }: {
   action: Action
   states: State[]
   categories: Category[]
   priorities: Priority[]
+  classNames?: string
 }) {
   const [isHover, setHover] = useState(false)
   const submit = useSubmit()
@@ -365,10 +368,12 @@ export function ActionGrid({
     <ContextMenu>
       <ContextMenuTrigger>
         <div
-          className={`group/action relative flex aspect-square select-none flex-col items-center justify-between rounded-xl from-white/5  p-4 hover:bg-gradient-to-b ${
+          className={`group/action relative flex aspect-square select-none flex-col items-center justify-between rounded from-white/5  p-4 text-gray-500 hover:bg-gradient-to-b ${cn(
+            classNames
+          )} ${
             action.state_id === FINISHED_ID
               ? " bg-gray-900/50 "
-              : "highlight-soft bg-gray-800 text-gray-500"
+              : "highlight-soft bg-gray-800"
           }`}
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
@@ -548,13 +553,16 @@ export function GridOfActions({
   return (
     <div className="scrollbars">
       <div className="grid h-full grid-cols-3 place-content-start gap-1">
-        {actions?.map((action) => (
+        {actions?.map((action, index) => (
           <ActionGrid
             action={action}
             categories={categories}
             states={states}
             key={action.id}
             priorities={priorities}
+            classNames={
+              index === 0 ? "rounded-tl-xl" : index === 2 ? "rounded-tr-xl" : ""
+            }
           />
         ))}
       </div>

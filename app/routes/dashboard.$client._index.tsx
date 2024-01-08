@@ -22,9 +22,9 @@ import {
 } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import invariant from "tiny-invariant"
-import { ListOfActions } from "~/components/structure/Action"
+import { ActionLine } from "~/components/structure/Action"
 import CreateAction from "~/components/structure/CreateAction"
 import { Button } from "~/components/ui/ui/button"
 import {
@@ -79,7 +79,7 @@ export default function Client() {
   const submit = useSubmit()
   const [draggedAction, setDraggedAction] = useState<Action>()
   const [stateFilter, setStateFilter] = useState<State>()
-  const [categoryFilter, setCategoryFilter] = useState<Category>()
+  const [categoryFilter, setCategoryFilter] = useState<Category[]>([])
 
   const { categories, priorities, states } = matches[1]
     .data as DashboardDataType
@@ -118,11 +118,15 @@ export default function Client() {
   const calendar = days.map((day) => {
     return {
       date: day,
-      actions: actions?.filter((action) =>
-        categoryFilter
-          ? isSameDay(parseISO(action.date), day) &&
-            action.category_id === categoryFilter.id
-          : isSameDay(parseISO(action.date), day)
+      actions: actions?.filter(
+        (action) =>
+          isSameDay(parseISO(action.date), day) &&
+          (categoryFilter.length > 0
+            ? categoryFilter.find(
+                (category) => category.id === action.category_id
+              )
+            : true) &&
+          (stateFilter ? action.state_id === stateFilter?.id : true)
       ),
     }
   })
@@ -175,7 +179,7 @@ export default function Client() {
   }, [])
 
   return (
-    <div className="container relative flex flex-col overflow-hidden">
+    <div className="container relative flex flex-col overflow-y-hidden">
       <div
         id="daysheader"
         className="container z-10 bg-background/25 backdrop-blur-lg"
@@ -212,7 +216,11 @@ export default function Client() {
                 <Button
                   size={"sm"}
                   variant={"ghost"}
-                  className={`bg-${stateFilter?.slug} text-xs font-semibold`}
+                  className={`${
+                    stateFilter
+                      ? `border-${stateFilter?.slug}`
+                      : "border-transparent"
+                  } border-2 text-xs font-semibold`}
                 >
                   {stateFilter ? stateFilter.title : "Filtre pelo Status"}
                 </Button>
@@ -255,15 +263,17 @@ export default function Client() {
                 <Button
                   size={"sm"}
                   variant={"ghost"}
-                  className={`text-xs font-semibold`}
+                  className={`${
+                    categoryFilter ? `border-primary` : "border-transparent"
+                  } border-2 text-xs font-semibold`}
                 >
-                  {categoryFilter ? (
+                  {categoryFilter.length > 0 ? (
                     <>
-                      <Icons
-                        id={categoryFilter.slug}
-                        className="mr-1 h-4 w-4"
-                      />
-                      <div>{categoryFilter.title}</div>
+                      <div>
+                        {categoryFilter
+                          .map((category) => category.title)
+                          .join(", ")}
+                      </div>
                     </>
                   ) : (
                     "Filtre pela Categoria"
@@ -273,9 +283,9 @@ export default function Client() {
               <DropdownMenuContent className="bg-content">
                 <DropdownMenuCheckboxItem
                   className="bg-select-item flex gap-2"
-                  checked={categoryFilter === undefined}
+                  checked={categoryFilter?.length == 0}
                   onCheckedChange={() => {
-                    setCategoryFilter(undefined)
+                    setCategoryFilter([])
                   }}
                 >
                   <Icons className="h-3 w-3" id="all" />
@@ -285,12 +295,32 @@ export default function Client() {
                   <DropdownMenuCheckboxItem
                     className="bg-select-item flex gap-2"
                     key={category.id}
-                    checked={category.id === categoryFilter?.id}
+                    checked={
+                      categoryFilter
+                        ? categoryFilter?.findIndex(
+                            (c) => category.id === c.id
+                          ) >= 0
+                        : false
+                    }
                     onCheckedChange={(checked) => {
-                      if (!checked && category.id === categoryFilter?.id) {
-                        setCategoryFilter(undefined)
+                      if (
+                        !checked &&
+                        categoryFilter?.findIndex(
+                          (c) => category.id === c.id
+                        ) >= 0
+                      ) {
+                        const filters = categoryFilter.filter(
+                          (c) => c.id != category.id
+                        )
+                        console.log({ filters })
+
+                        setCategoryFilter(filters)
                       } else {
-                        setCategoryFilter(category)
+                        setCategoryFilter(
+                          categoryFilter
+                            ? [...categoryFilter, category]
+                            : [category]
+                        )
                       }
                     }}
                   >
@@ -315,18 +345,13 @@ export default function Client() {
           className="absolute bottom-0 hidden h-[1px] w-full bg-gradient-to-r from-transparent via-gray-700"
         ></div>
       </div>
-      <div
-        id="calendar"
-        className={`grid-cols-7 text-gray-300 md:grid ${
-          calendar.length === 35 ? "grid-rows-5" : "grid-rows-6"
-        }`}
-      >
+      <div id="calendar" className={`grid-cols-7 text-gray-300 md:grid`}>
         {calendar.map((day, i) => (
           <div
+            key={i}
             className={`${
               !isSameMonth(day.date, currentDate) ? "hidden md:block" : ""
             } group/day relative border-t bg-gradient-to-b py-2 transition hover:from-gray-900 hover:via-transparent md:px-1 md:pt-0`}
-            key={i}
             data-date={format(day.date, "yyyy-MM-dd")}
             onDragOver={(e) => {
               e.stopPropagation()
@@ -359,18 +384,36 @@ export default function Client() {
                 />
               </div>
             </div>
-            <div className="relative">
-              <ListOfActions
-                categories={categories}
-                priorities={priorities}
-                states={states}
-                actions={day.actions}
-                showCategory
-                date={{ timeFormat: 1 }}
-                onDrag={(action) => {
-                  setDraggedAction(action)
-                }}
-              />
+            <div className="relative flex flex-col gap-3">
+              {categories
+                .map((category) => ({
+                  category,
+                  actions: day.actions?.filter(
+                    (action) => category.id === action.category_id
+                  ),
+                }))
+                .map(({ category, actions }) =>
+                  actions && actions.length > 0 ? (
+                    <div key={category.id} className="flex flex-col gap-1">
+                      <div className="text-[8px] font-bold uppercase tracking-widest text-gray-500">
+                        {category.title}
+                      </div>
+                      {actions?.map((action) => (
+                        <ActionLine
+                          action={action}
+                          categories={categories}
+                          priorities={priorities}
+                          states={states}
+                          key={action.id}
+                          date={{
+                            timeFormat: 1,
+                          }}
+                          onDrag={setDraggedAction}
+                        />
+                      ))}
+                    </div>
+                  ) : null
+                )}
             </div>
           </div>
         ))}
