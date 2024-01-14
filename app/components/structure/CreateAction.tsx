@@ -122,6 +122,14 @@ export default function CreateAction({
           dangerouslySetInnerHTML={{ __html: action.title }}
           tabIndex={0}
           role="textbox"
+          onPaste={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            setAction({
+              ...action,
+              title: e.clipboardData.getData("text"),
+            })
+          }}
         ></div>
         {/* Descrição */}
         <div
@@ -135,6 +143,14 @@ export default function CreateAction({
           }
           data-placeholder="Descrição da ação"
           dangerouslySetInnerHTML={{ __html: action.description }}
+          onPaste={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            setAction({
+              ...action,
+              description: e.clipboardData.getData("text"),
+            })
+          }}
         ></div>
         <hr className="-mx-4 mb-4 mt-2 border-gray-300/20 md:-mx-6" />
         <div className="flex flex-wrap justify-center gap-2 md:flex-nowrap md:justify-between">

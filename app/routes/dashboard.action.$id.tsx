@@ -176,7 +176,15 @@ export default function ActionPage() {
               title: e.currentTarget.innerText,
             })
           }
-          className="bg-transparent  text-5xl font-semibold tracking-tighter outline-none transition "
+          className="bg-transparent  text-5xl font-semibold tracking-tighter outline-none transition"
+          onPaste={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            setAction({
+              ...action,
+              title: e.clipboardData.getData("text"),
+            })
+          }}
         />
         {/* Descrição */}
         <div className="flex shrink grow flex-col overflow-hidden">
@@ -196,6 +204,14 @@ export default function ActionPage() {
               })
             }
             className="scrollbars shrink grow bg-transparent text-xl font-normal leading-normal outline-none transition"
+            onPaste={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              setAction({
+                ...action,
+                description: e.clipboardData.getData("text"),
+              })
+            }}
           />
         </div>
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">

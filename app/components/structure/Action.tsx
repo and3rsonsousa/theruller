@@ -1,6 +1,8 @@
 import { Form, Link, useNavigate, useSubmit } from "@remix-run/react"
 import {
+  addDays,
   addHours,
+  addMonths,
   format,
   formatDistanceToNow,
   isSameYear,
@@ -20,12 +22,12 @@ import { Fragment, useEffect, useRef, useState } from "react"
 import { flushSync } from "react-dom"
 import { FINISHED_ID, INTENTS, PRIORITIES } from "~/lib/constants"
 import { AvatarClient, Icons } from "~/lib/helpers"
+import { cn } from "~/lib/utils"
 import { Toggle } from "../ui/Spectrum"
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
-  ContextMenuLabel,
   ContextMenuPortal,
   ContextMenuSeparator,
   ContextMenuSub,
@@ -33,7 +35,6 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "../ui/ui/context-menu"
-import { cn } from "~/lib/utils"
 
 export function ActionLine({
   action,
@@ -59,6 +60,8 @@ export function ActionLine({
   const navigate = useNavigate()
 
   const submit = useSubmit()
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   function handleActions(data: {
     [key: string]: string | number | null | string[]
@@ -78,18 +81,20 @@ export function ActionLine({
       <ContextMenuTrigger>
         <div
           title={action.title}
-          className={`group/action relative flex w-full cursor-pointer select-none items-center justify-between gap-2 overflow-hidden rounded border-l-4 px-2 py-1  text-sm font-medium shadow transition @[180px]:px-4 md:text-xs ${
+          className={`group/action relative flex w-full select-none items-center justify-between gap-2 overflow-hidden rounded border-l-4 px-2 py-1  text-sm font-medium shadow ring-primary transition @[180px]:px-4 md:text-xs ${
             edit
-              ? "bg-gray-700"
-              : "bg-gray-900 hover:bg-gray-800 hover:text-gray-200"
-          } border-${states.find(
-            (state) => state.id === Number(action.state_id)
-          )?.slug}`}
+              ? "bg-gray-300 text-gray-900 ring-2"
+              : "cursor-text bg-gray-900 hover:bg-gray-800 hover:text-gray-200"
+          } border-${
+            states.find((state) => state.id === Number(action.state_id))?.slug
+          }`}
           onClick={(e) => {
-            if (e.shiftKey) {
-              setEdit(true)
-            } else {
+            e.preventDefault()
+            e.stopPropagation()
+            if (e.shiftKey && !edit) {
               navigate(`/dashboard/action/${action.id}`)
+            } else {
+              setEdit(true)
             }
           }}
           onMouseEnter={() => {
@@ -107,10 +112,8 @@ export function ActionLine({
           }}
         >
           {/* Atalhos */}
-          {isHover && !edit && !edit ? (
-            <ShortcutActions action={action} />
-          ) : null}
-          <div className="flex shrink grow items-center gap-2">
+          {isHover && !edit ? <ShortcutActions action={action} /> : null}
+          <div className="flex shrink grow items-center gap-2 overflow-hidden">
             {showCategory && (
               <Icons
                 id={
@@ -122,24 +125,70 @@ export function ActionLine({
               />
             )}
             {client && <AvatarClient size="xs" client={client} />}
-            <div className="relative w-full">
-              <input
+            <div className="relative w-full shrink grow-0">
+              {edit ? (
+                <Form
+                  method="POST"
+                  onSubmit={() => {
+                    flushSync(() => {
+                      setEdit(false)
+                    })
+                    buttonRef.current?.focus()
+                  }}
+                >
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    defaultValue={action.title}
+                    className="w-full bg-transparent outline-none"
+                    onBlur={() => {
+                      if (
+                        inputRef.current?.value !== undefined &&
+                        inputRef.current?.value !== action.title
+                      )
+                        handleActions({
+                          intent: INTENTS.updateAction,
+                          ...action,
+                          title: inputRef.current?.value,
+                        })
+
+                      setEdit(() => false)
+                    }}
+                  />
+                </Form>
+              ) : (
+                <button
+                  ref={buttonRef}
+                  className={`block w-full overflow-hidden text-ellipsis text-nowrap text-left outline-none`}
+                  onClick={() => {
+                    flushSync(() => {
+                      setEdit(true)
+                    })
+                    inputRef.current?.select()
+                  }}
+                >
+                  {action.title}
+                </button>
+              )}
+              {/* <input
                 readOnly={!edit}
                 type="text"
+                ref={inputRef}
                 defaultValue={action.title}
                 className={`w-full bg-transparent outline-none ${
-                  !edit ? "cursor-pointer opacity-0" : "opacity-100"
+                  !edit ? "opacity-0" : "opacity-100"
                 }`}
                 onBlur={(e) => {
-                  if (e.target.value !== action.title)
-                    submit({
+                  if (e.target.value !== action.title) {
+                    console.log({ value: e.target.value })
+                    handleActions({
                       intent: INTENTS.updateAction,
                       ...action,
                       title: e.target.value,
                       fetcherKey: `action:${action.id}:update:name`,
                     })
-
-                  setEdit(() => false)
+                  }
+                  setEdit(false)
                 }}
               />
               <span
@@ -148,7 +197,7 @@ export function ActionLine({
                 }`}
               >
                 {action.title}
-              </span>
+              </span> */}
             </div>
           </div>
 
@@ -212,9 +261,9 @@ export function ActionBlock({
       <ContextMenuTrigger>
         <div
           title={action.title}
-          className={`highlight-soft group/action flex w-full flex-col justify-between gap-2 overflow-hidden rounded border-l-4 px-4 py-2 text-sm transition @container border-${states.find(
-            (state) => state.id === Number(action.state_id)
-          )?.slug} ${
+          className={`highlight-soft group/action flex w-full flex-col justify-between gap-2 overflow-hidden rounded border-l-4 px-4 py-2 text-sm transition @container border-${
+            states.find((state) => state.id === Number(action.state_id))?.slug
+          } ${
             edit
               ? "bg-gray-800 text-gray-200"
               : "border-white/20 bg-gray-900 from-white/5 hover:bg-gradient-to-b hover:text-gray-200"
@@ -233,13 +282,10 @@ export function ActionBlock({
               <Form
                 method="POST"
                 onSubmit={() => {
-                  // event.preventDefault()
-                  // if (event.currentTarget.value !== action.title) {
                   flushSync(() => {
                     setEdit(false)
                   })
                   buttonRef.current?.focus()
-                  // }
                 }}
               >
                 <input
@@ -393,9 +439,10 @@ export function ActionGrid({
           </div>
           <div className="flex items-center justify-center gap-2 leading-none">
             <div
-              className={`h-2 w-2 rounded-full bg-${states.find(
-                (state) => state.id === Number(action.state_id)
-              )?.slug}`}
+              className={`h-2 w-2 rounded-full bg-${
+                states.find((state) => state.id === Number(action.state_id))
+                  ?.slug
+              }`}
             ></div>
 
             <div className="text-[10px] text-gray-400">
@@ -590,7 +637,10 @@ function ShortcutActions({ action }: { action: Action }) {
   useEffect(() => {
     const keyDown = async function (event: KeyboardEvent) {
       const key = event.key.toLowerCase()
-      if (["i", "f", "z", "t", "a", "c"].find((k) => k === key)) {
+      if (
+        ["i", "f", "z", "a", "t", "c"].find((k) => k === key) &&
+        event.shiftKey
+      ) {
         let state_id = 0
         if (key === "i") {
           state_id = 1
@@ -628,19 +678,19 @@ function ShortcutActions({ action }: { action: Action }) {
         })
       } else if (key === "x") {
         handleActions({ ...action, intent: INTENTS.deleteAction })
-      } else if (key === "1") {
+      } else if (key === ",") {
         handleActions({
           ...action,
           intent: INTENTS.updateAction,
           priority_id: PRIORITIES.low,
         })
-      } else if (key === "2") {
+      } else if (key === ".") {
         handleActions({
           ...action,
           intent: INTENTS.updateAction,
           priority_id: PRIORITIES.medium,
         })
-      } else if (key === "3") {
+      } else if (key === "/3") {
         handleActions({
           ...action,
           intent: INTENTS.updateAction,
@@ -654,6 +704,33 @@ function ShortcutActions({ action }: { action: Action }) {
           ...action,
           intent: INTENTS.updateAction,
           date: format(date, "yyyy-MM-dd HH:mm:ss"),
+        })
+      } else if (key === "a") {
+        handleActions({
+          ...action,
+          intent: INTENTS.updateAction,
+          date: format(
+            parseISO(action.date).setDate(addDays(new Date(), 1).getDate()),
+            "yyyy-MM-dd HH:mm:ss"
+          ),
+        })
+      } else if (key === "s") {
+        handleActions({
+          ...action,
+          intent: INTENTS.updateAction,
+          date: format(
+            parseISO(action.date).setDate(addDays(new Date(), 7).getDate()),
+            "yyyy-MM-dd HH:mm:ss"
+          ),
+        })
+      } else if (key === "m") {
+        handleActions({
+          ...action,
+          intent: INTENTS.updateAction,
+          date: format(
+            parseISO(action.date).setMonth(addMonths(new Date(), 1).getMonth()),
+            "yyyy-MM-dd HH:mm:ss"
+          ),
         })
       }
     }
@@ -762,25 +839,51 @@ function ContextMenuItems({
           <ContextMenuSubContent className="bg-content">
             {[
               {
-                title: "Horas",
                 periods: [
-                  { time: 1, text: "daqui a 1 hora" },
-                  { time: 3, text: "daqui a 3 horas" },
-                  { time: 8, text: "daqui a 8 horas" },
+                  {
+                    time: addHours(parseISO(action.date), 1),
+                    text: "daqui a 1 hora",
+                  },
+                  {
+                    time: addHours(parseISO(action.date), 3),
+                    text: "daqui a 3 horas",
+                  },
+                  {
+                    time: addHours(parseISO(action.date), 8),
+                    text: "daqui a 8 horas",
+                  },
                 ],
               },
               {
-                title: "Dias",
                 periods: [
-                  { time: 24, text: "1 dia" },
-                  { time: 3 * 24, text: "3 dias" },
+                  {
+                    time: parseISO(action.date).setDate(
+                      addDays(new Date(), 1).getDate()
+                    ),
+                    text: "Amanhã",
+                  },
+                  {
+                    time: parseISO(action.date).setDate(
+                      addDays(new Date(), 3).getDate()
+                    ),
+                    text: "3 dias",
+                  },
                 ],
               },
               {
-                title: "Outros",
                 periods: [
-                  { time: 7 * 24, text: "1 semana" },
-                  { time: 30 * 24, text: "1 mês" },
+                  {
+                    time: parseISO(action.date).setDate(
+                      addDays(new Date(), 7).getDate()
+                    ),
+                    text: "1 semana",
+                  },
+                  {
+                    time: parseISO(action.date).setMonth(
+                      addMonths(new Date(), 1).getMonth()
+                    ),
+                    text: "1 mês",
+                  },
                 ],
               },
             ].map((group, i) => (
@@ -791,26 +894,13 @@ function ContextMenuItems({
                     className="bg-gray-300/20"
                   />
                 )}
-                <ContextMenuLabel className="mx-2" key={`label-${i}`}>
-                  {group.title}
-                </ContextMenuLabel>
+
                 {group.periods.map((period) => (
                   <ContextMenuItem
                     key={`period-${period.time}`}
                     className="bg-item flex items-center gap-2 focus:bg-primary"
                     onSelect={() => {
-                      const date = format(
-                        period.time > 20
-                          ? addHours(parseISO(action.date), period.time)
-                          : addHours(
-                              new Date().setHours(
-                                parseISO(action.date).getHours(),
-                                parseISO(action.date).getMinutes()
-                              ),
-                              period.time
-                            ),
-                        "yyyy-MM-dd'T'HH:mm:ss"
-                      )
+                      const date = format(period.time, "yyyy-MM-dd'T'HH:mm:ss")
 
                       handleActions({
                         intent: INTENTS.updateAction,
@@ -915,9 +1005,9 @@ function ContextMenuItems({
       <ContextMenuSub>
         <ContextMenuSubTrigger className="bg-item flex items-center gap-2 focus:bg-primary">
           <div
-            className={`h-2 w-2 rounded-full border-2 border-${states.find(
-              (state) => state.id === Number(action.state_id)
-            )?.slug}`}
+            className={`h-2 w-2 rounded-full border-2 border-${
+              states.find((state) => state.id === Number(action.state_id))?.slug
+            }`}
           ></div>
           <span>
             {

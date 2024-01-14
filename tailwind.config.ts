@@ -59,7 +59,7 @@ module.exports = {
         idea: colors.yellow,
         do: colors.orange,
         doing: colors.pink,
-        review: colors.purple,
+        review: colors.indigo,
         done: colors.sky,
         finished: colors.emerald,
 

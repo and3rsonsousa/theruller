@@ -210,7 +210,7 @@ export default function Client() {
               </Link>
             </Button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pr-1">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -262,10 +262,8 @@ export default function Client() {
               <DropdownMenuTrigger asChild>
                 <Button
                   size={"sm"}
-                  variant={"ghost"}
-                  className={`${
-                    categoryFilter ? `border-primary` : "border-transparent"
-                  } border-2 text-xs font-semibold`}
+                  variant={categoryFilter.length > 0 ? "default" : "ghost"}
+                  className={`text-xs font-semibold`}
                 >
                   {categoryFilter.length > 0 ? (
                     <>
@@ -312,7 +310,6 @@ export default function Client() {
                         const filters = categoryFilter.filter(
                           (c) => c.id != category.id
                         )
-                        console.log({ filters })
 
                         setCategoryFilter(filters)
                       } else {
@@ -380,7 +377,9 @@ export default function Client() {
                 <CreateAction
                   mode="day"
                   date={day.date}
-                  key={format(day.date, "yyyy-MM-dd")}
+                  key={`${format(day.date, "yyyy-MM-dd")}-${
+                    Math.random() * 10000
+                  }`}
                 />
               </div>
             </div>

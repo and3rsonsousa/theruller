@@ -3,13 +3,17 @@ import { Link, useLoaderData, useMatches } from "@remix-run/react"
 import {
   addDays,
   addMonths,
+  eachDayOfInterval,
   endOfDay,
   endOfMonth,
+  endOfWeek,
   format,
+  isSameDay,
   isSameMonth,
   isThisMonth,
   startOfDay,
   startOfMonth,
+  startOfWeek,
 } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { LaughIcon } from "lucide-react"
@@ -111,7 +115,7 @@ export default function DashboardIndex() {
                 .length,
               color: `bg-${state.slug}`,
             }))}
-          total={actions?.length}
+          total={actions?.length || 0}
         />
         {/* Ações em Atraso */}
         {lateActions?.length ? (
@@ -227,6 +231,36 @@ export default function DashboardIndex() {
             </div>
           </div>
         )}
+
+        <div className="mb-8">
+          <div className="flex justify-between pb-4 pt-8">
+            <h2 className="text-3xl font-medium tracking-tight">Semana</h2>
+          </div>
+          <div className="grid grid-cols-7 gap-2">
+            {eachDayOfInterval({
+              start: startOfWeek(new Date()),
+              end: endOfWeek(new Date()),
+            }).map((day) => (
+              <div key={day.getDate()}>
+                <div className="pb-4 text-sm font-medium capitalize">
+                  {" "}
+                  {format(day, "EEEE", { locale: ptBR })}{" "}
+                </div>
+                <ListOfActions
+                  categories={categories}
+                  priorities={priorities}
+                  states={states}
+                  actions={actions?.filter((action) =>
+                    isSameDay(action.date, day)
+                  )}
+                  clients={clients}
+                  date={{ timeFormat: 1 }}
+                  showCategory={true}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
 
         <div className="mb-8">
           <div className="flex justify-between pb-4 pt-8">
