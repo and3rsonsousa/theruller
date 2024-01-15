@@ -83,7 +83,7 @@ export function ActionLine({
           title={action.title}
           className={`group/action relative flex w-full select-none items-center justify-between gap-2 overflow-hidden rounded border-l-4 px-2 py-1 text-sm font-medium shadow outline-none ring-primary transition @[180px]:px-4 focus-within:ring-2 focus:ring-2 md:text-xs ${
             edit
-              ? "bg-gray-300 text-gray-900"
+              ? "bg-gray-950 text-gray-200"
               : "cursor-text bg-gray-900 hover:bg-gray-800 hover:text-gray-200"
           } border-${
             states.find((state) => state.id === Number(action.state_id))?.slug
@@ -159,7 +159,7 @@ export function ActionLine({
               ) : (
                 <button
                   ref={buttonRef}
-                  className={`block w-full overflow-hidden text-ellipsis text-nowrap text-left outline-none`}
+                  className={`block w-full cursor-text overflow-hidden text-ellipsis text-nowrap text-left outline-none`}
                   onClick={() => {
                     flushSync(() => {
                       setEdit(true)

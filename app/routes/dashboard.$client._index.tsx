@@ -171,11 +171,11 @@ export default function Client() {
         const calendar = document.querySelector("#calendar")
         const divider = document.querySelector("#divider")
         if ((e as React.UIEvent<HTMLElement>).currentTarget.scrollTop > 60) {
-          header?.classList.add("fixed", "top-[64px]", "-ml-8", "px-9")
+          header?.classList.add("fixed", "top-[64px]", "-ml-8", "px-8")
           calendar?.classList.add("mt-20")
           divider?.classList.remove("hidden")
         } else {
-          header?.classList.remove("fixed", "-ml-8", "px-9")
+          header?.classList.remove("fixed", "-ml-8", "px-8")
           calendar?.classList.remove("mt-20")
           divider?.classList.add("hidden")
         }
@@ -346,7 +346,7 @@ export default function Client() {
           className="absolute bottom-0 hidden h-[1px] w-full bg-gradient-to-r from-transparent via-gray-700"
         ></div>
       </div>
-      <div id="calendar" className={`grid-cols-7 text-gray-300 md:grid`}>
+      <div id="calendar" className={`grid-cols-7 pb-4 text-gray-300 md:grid`}>
         {calendar.map((day, i) => (
           <CalendarDay
             key={i}
@@ -496,8 +496,8 @@ export const CalendarDay = ({
           )}
       </div>
       {isHover ? (
-        <div className="mt-2">
-          <div className="flex items-center gap-1 overflow-hidden rounded bg-gray-950 p-1 ring-primary focus-within:ring-2">
+        <div className={`absolute -bottom-1 z-10`}>
+          <div className="flex items-center gap-1 overflow-hidden rounded border border-white/10 bg-gray-950/50 p-1 ring-primary backdrop-blur-lg focus-within:ring-2">
             <PlusIcon className="h-4 w-4 text-gray-500" />
             <Form
               method="post"
