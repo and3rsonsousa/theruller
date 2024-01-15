@@ -1,5 +1,6 @@
 import { LoaderFunctionArgs, json } from "@remix-run/node"
 import {
+  Form,
   Link,
   useLoaderData,
   useMatches,
@@ -21,11 +22,10 @@ import {
   subMonths,
 } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from "lucide-react"
 import React, { useEffect, useState } from "react"
 import invariant from "tiny-invariant"
 import { ActionLine } from "~/components/structure/Action"
-import CreateAction from "~/components/structure/CreateAction"
 import { Button } from "~/components/ui/ui/button"
 import {
   DropdownMenu,
@@ -33,7 +33,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "~/components/ui/ui/dropdown-menu"
-import { INTENTS } from "~/lib/constants"
+import { INTENTS, POST_ID, PRIORITIES } from "~/lib/constants"
 import {
   Icons,
   sortActions,
@@ -75,13 +75,17 @@ export default function Client() {
   let { actions } = useLoaderData<typeof loader>()
   const { client } = useLoaderData<typeof loader>()
   const [searchParams] = useSearchParams()
-  const matches = useMatches()
-  const submit = useSubmit()
+
+  invariant(client)
+
   const [draggedAction, setDraggedAction] = useState<Action>()
   const [stateFilter, setStateFilter] = useState<State>()
   const [categoryFilter, setCategoryFilter] = useState<Category[]>([])
 
-  const { categories, priorities, states } = matches[1]
+  const matches = useMatches()
+  const submit = useSubmit()
+
+  const { categories, priorities, states, user, people } = matches[1]
     .data as DashboardDataType
 
   const date = searchParams.get("date") || format(new Date(), "yyyy-MM-dd")
@@ -344,79 +348,198 @@ export default function Client() {
       </div>
       <div id="calendar" className={`grid-cols-7 text-gray-300 md:grid`}>
         {calendar.map((day, i) => (
-          <div
+          <CalendarDay
             key={i}
-            className={`${
-              !isSameMonth(day.date, currentDate) ? "hidden md:block" : ""
-            } group/day relative border-t bg-gradient-to-b py-2 transition hover:from-gray-900 hover:via-transparent md:px-1 md:pt-0`}
-            data-date={format(day.date, "yyyy-MM-dd")}
-            onDragOver={(e) => {
-              e.stopPropagation()
-              e.preventDefault()
-              document
-                .querySelectorAll(".dragover")
-                .forEach((e) => e.classList.remove("dragover"))
-              e.currentTarget.classList.add("dragover")
-            }}
-          >
-            <div className="absolute -top-[1px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-gray-500 opacity-0 transition group-hover/day:opacity-100"></div>
-
-            <div className="my-1 flex justify-between">
-              <div
-                className={`grid h-6 w-6 place-content-center rounded-full text-xs font-medium ${
-                  isSameMonth(day.date, currentDate) ? "" : "text-gray-700"
-                } ${
-                  isToday(day.date)
-                    ? "bg-primary text-primary-foreground"
-                    : "-ml-1"
-                } `}
-              >
-                {day.date.getDate()}
-              </div>
-              <div className="transition group-hover/day:opacity-100 md:opacity-0">
-                <CreateAction
-                  mode="day"
-                  date={day.date}
-                  key={`${format(day.date, "yyyy-MM-dd")}-${
-                    Math.random() * 10000
-                  }`}
-                />
-              </div>
-            </div>
-            <div className="relative flex flex-col gap-3">
-              {categories
-                .map((category) => ({
-                  category,
-                  actions: day.actions?.filter(
-                    (action) => category.id === action.category_id
-                  ),
-                }))
-                .map(({ category, actions }) =>
-                  actions && actions.length > 0 ? (
-                    <div key={category.id} className="flex flex-col gap-1">
-                      <div className="text-[8px] font-bold uppercase tracking-widest text-gray-500">
-                        {category.title}
-                      </div>
-                      {actions?.map((action) => (
-                        <ActionLine
-                          action={action}
-                          categories={categories}
-                          priorities={priorities}
-                          states={states}
-                          key={action.id}
-                          date={{
-                            timeFormat: 1,
-                          }}
-                          onDrag={setDraggedAction}
-                        />
-                      ))}
-                    </div>
-                  ) : null
-                )}
-            </div>
-          </div>
+            categories={categories}
+            priorities={priorities}
+            states={states}
+            currentDate={currentDate}
+            day={day}
+            setDraggedAction={setDraggedAction}
+            client={client}
+            user={user}
+            people={people}
+          />
         ))}
       </div>
+    </div>
+  )
+}
+
+export const CalendarDay = ({
+  day,
+  currentDate,
+  categories,
+  priorities,
+  states,
+  setDraggedAction,
+  client,
+  user,
+}: {
+  day: { date: Date; actions?: Action[] }
+  currentDate: Date
+  categories: Category[]
+  priorities: Priority[]
+  states: State[]
+  client: Client
+  user: Person
+  people: Person[]
+  setDraggedAction: React.Dispatch<React.SetStateAction<Action | undefined>>
+}) => {
+  const [isHover, setIsHover] = useState(false)
+
+  const submit = useSubmit()
+
+  function handleActions(data: {
+    [key: string]: string | number | null | string[]
+  }) {
+    submit(
+      { ...data },
+      {
+        action: "/handle-actions",
+        method: "post",
+        navigate: false,
+      }
+    )
+  }
+
+  const newAction = {
+    category_id: POST_ID,
+    client_id: client.id,
+    date: format(
+      (() => {
+        const date = day.date
+        date.setHours(11, 0)
+        return date
+      })(),
+      "yyyy-MM-dd'T'HH:mm:ss"
+    ),
+    title: "",
+    description: "",
+    priority_id: PRIORITIES.medium,
+    responsibles: [user.user_id],
+    user_id: user.user_id,
+    state_id: 1,
+  }
+
+  return (
+    <div
+      className={`${
+        !isSameMonth(day.date, currentDate) ? "hidden md:block" : ""
+      } group/day relative border-t bg-gradient-to-b py-2 transition hover:from-gray-900 hover:via-transparent md:px-1 md:pt-0`}
+      data-date={format(day.date, "yyyy-MM-dd")}
+      onDragOver={(e) => {
+        e.stopPropagation()
+        e.preventDefault()
+        document
+          .querySelectorAll(".dragover")
+          .forEach((e) => e.classList.remove("dragover"))
+        e.currentTarget.classList.add("dragover")
+      }}
+      onFocus={() => setIsHover(true)}
+      onBlur={() => setIsHover(false)}
+      onMouseOver={() => setIsHover(true)}
+      onMouseLeave={() => setIsHover(false)}
+    >
+      {/* Brilho */}
+      <div className="absolute -top-[1px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-gray-500 opacity-0 transition group-hover/day:opacity-100"></div>
+
+      <div className="my-1 flex justify-between">
+        <div
+          className={`grid h-6 w-6 place-content-center rounded-full text-xs font-medium ${
+            isSameMonth(day.date, currentDate) ? "" : "text-gray-700"
+          } ${
+            isToday(day.date) ? "bg-primary text-primary-foreground" : "-ml-1"
+          } `}
+        >
+          {day.date.getDate()}
+        </div>
+        {/* <div className="transition group-hover/day:opacity-100 md:opacity-0">
+      <CreateAction
+        mode="day"
+        date={day.date}
+        key={`${format(day.date, "yyyy-MM-dd")}-${
+          Math.random() * 10000
+        }`}
+      />
+    </div> */}
+      </div>
+      <div className="relative flex flex-col gap-3">
+        {categories
+          .map((category) => ({
+            category,
+            actions: day.actions?.filter(
+              (action) => category.id === action.category_id
+            ),
+          }))
+          .map(({ category, actions }) =>
+            actions && actions.length > 0 ? (
+              <div key={category.id} className="flex flex-col gap-1">
+                <div className="text-[8px] font-bold uppercase tracking-widest text-gray-500">
+                  {category.title}
+                </div>
+                {actions?.map((action) => (
+                  <ActionLine
+                    action={action}
+                    categories={categories}
+                    priorities={priorities}
+                    states={states}
+                    key={action.id}
+                    date={{
+                      timeFormat: 1,
+                    }}
+                    onDrag={setDraggedAction}
+                  />
+                ))}
+              </div>
+            ) : null
+          )}
+      </div>
+      {isHover ? (
+        <div className="mt-2">
+          <div className="flex items-center gap-1 overflow-hidden rounded bg-gray-950 p-1 ring-primary focus-within:ring-2">
+            <PlusIcon className="h-4 w-4 text-gray-500" />
+            <Form
+              method="post"
+              className="block"
+              action="/handle-actions"
+              onSubmit={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+
+                const formData = new FormData(e.currentTarget)
+                const title = formData.get("title") as string
+
+                if (title.length > 2) {
+                  handleActions({
+                    ...newAction,
+                    title,
+
+                    id: window.crypto.randomUUID(),
+                    intent: INTENTS.createAction,
+                  })
+                }
+              }}
+            >
+              <input
+                type="text"
+                className="block w-full bg-transparent p-0 text-xs font-medium outline-none placeholder:text-gray-700 hover:placeholder:text-gray-400"
+                placeholder="Nova ação..."
+                name="title"
+                onBlur={(e) => {
+                  if (e.target.value.length > 2)
+                    handleActions({
+                      ...newAction,
+                      title: e.currentTarget.value,
+                      id: window.crypto.randomUUID(),
+                      intent: INTENTS.createAction,
+                    })
+                }}
+              />
+            </Form>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
