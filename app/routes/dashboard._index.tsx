@@ -16,15 +16,10 @@ import {
   startOfWeek,
 } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { LaughIcon } from "lucide-react"
-import { useState } from "react"
 import invariant from "tiny-invariant"
-import { BlockOfActions, ListOfActions } from "~/components/structure/Action"
+import { ListOfActions } from "~/components/structure/Action"
 import CreateAction from "~/components/structure/CreateAction"
 import Progress from "~/components/structure/Progress"
-import { Toggle } from "~/components/ui/Spectrum"
-import { ScrollArea } from "~/components/ui/ui/scroll-area"
-import { FINISHED_ID } from "~/lib/constants"
 import {
   AvatarClient,
   getActionsForThisDay,
@@ -64,11 +59,10 @@ export const meta: MetaFunction = () => {
 export default function DashboardIndex() {
   let { actions } = useLoaderData<typeof loader>()
   const matches = useMatches()
-  const [allActions, setAllActions] = useState(false)
 
   invariant(actions)
 
-  const _actions = new Map<string, Action>(
+  const actionsMap = new Map<string, Action>(
     actions.map((action) => [action.id, action])
   )
 
@@ -79,18 +73,14 @@ export default function DashboardIndex() {
   const idsToRemove = useIDsToRemove()
 
   for (const action of pendingActions as Action[]) {
-    _actions.set(action.id, action)
+    actionsMap.set(action.id, action)
   }
 
   for (const id of idsToRemove) {
-    _actions.delete(id)
-    actions.splice(
-      actions.findIndex((action) => action.id === id),
-      1
-    )
+    actionsMap.delete(id)
   }
 
-  actions = sortActions(Array.from(_actions, ([, v]) => v))
+  actions = sortActions(Array.from(actionsMap, ([, v]) => v))
 
   const lateActions = getDelayedActions({ actions: actions as Action[] })
   const todayActions = getActionsForThisDay({ actions })
@@ -102,19 +92,16 @@ export default function DashboardIndex() {
 
   return (
     <div className="container overflow-hidden">
-      <ScrollArea className="h-full w-full px-4 md:px-8">
-        <div className="pt-16"></div>
+      <div className="scrollbars mt-16 px-4 md:px-8">
         <Progress
           className={"mt-4"}
-          values={states
-            // .filter((state) => state.id !== FINISHED_ID)
-            .map((state) => ({
-              id: state.id,
-              title: state.title,
-              value: actions?.filter((action) => action.state_id === state.id)
-                .length,
-              color: `bg-${state.slug}`,
-            }))}
+          values={states.map((state) => ({
+            id: state.id,
+            title: state.title,
+            value: actions?.filter((action) => action.state_id === state.id)
+              .length,
+            color: `bg-${state.slug}`,
+          }))}
           total={actions?.length || 0}
         />
         {/* Ações em Atraso */}
@@ -141,10 +128,17 @@ export default function DashboardIndex() {
         {/* Clientes - Parceiros - Contas */}
         <div className="mb-8 mt-4">
           <h4 className="mb-4 text-xl font-medium">Contas</h4>
-          <div className="flow flex flex-wrap justify-center gap-4">
+          <div className="flow mx-auto grid w-auto grid-cols-4 flex-wrap justify-center gap-4 sm:grid-cols-6 lg:grid-cols-12">
             {clients.map((client) => (
-              <Link to={`/dashboard/${client.slug}`} key={client.id}>
-                <AvatarClient client={client} size="lg" />
+              <Link
+                to={`/dashboard/${client.slug}`}
+                key={client.id}
+                className="group relative"
+              >
+                <AvatarClient client={client} size="lg" className="mx-auto" />
+                <div className="absolute w-full -translate-y-4 text-center text-xs font-medium leading-tight opacity-0 transition duration-500 group-hover:translate-y-2 group-hover:opacity-100">
+                  {client.title}
+                </div>
               </Link>
             ))}
           </div>
@@ -156,40 +150,35 @@ export default function DashboardIndex() {
               <h2 className="text-3xl font-medium tracking-tight">
                 Hoje ({todayActions?.length})
               </h2>
-              <div>
-                <Toggle
-                  aria-pressed={allActions}
-                  size={"sm"}
-                  onChange={setAllActions}
-                >
-                  {allActions
-                    ? "Exibir apenas as não conluídas"
-                    : "Exibir ações concluídas"}
-                </Toggle>
+            </div>
+            <div className="scrollbars-horizontal scrollbars-horizontal-thin ">
+              <div className="flex w-full gap-4 pb-4">
+                {states.map((state) => (
+                  <div className="min-w-72" key={state.id}>
+                    <div className="mb-2 flex items-center gap-2">
+                      <div
+                        className={`size-4 rounded-full border-4 border-${state.slug}`}
+                      ></div>
+                      <h4 className="font-medium">{state.title}</h4>
+                    </div>
+                    <ListOfActions
+                      categories={categories}
+                      priorities={priorities}
+                      states={states}
+                      clients={clients}
+                      showCategory={true}
+                      date={{
+                        dateFormat: 0,
+                        timeFormat: 1,
+                      }}
+                      actions={todayActions.filter(
+                        (action) => action.state_id === state.id
+                      )}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
-
-            {todayActions.filter((action) => action.state_id !== FINISHED_ID)
-              .length > 0 || allActions ? (
-              <BlockOfActions
-                categories={categories}
-                priorities={priorities}
-                states={states}
-                actions={
-                  allActions
-                    ? todayActions
-                    : todayActions.filter(
-                        (action) => action.state_id !== FINISHED_ID
-                      )
-                }
-                clients={clients}
-              />
-            ) : (
-              <div className="flex items-center justify-center gap-4">
-                <LaughIcon className="size-6 text-gray-400" />
-                <div>Todas as ações de hoje já foram concluídas</div>
-              </div>
-            )}
           </div>
         ) : (
           <div className="grid place-content-center p-8 text-xl">
@@ -312,7 +301,8 @@ export default function DashboardIndex() {
             />
           </>
         </div>
-      </ScrollArea>
+        {/* </ScrollArea> */}
+      </div>
     </div>
   )
 }

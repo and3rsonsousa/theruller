@@ -23,7 +23,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     .single()
 
   if (client) {
-    return json({ client }, { headers })
+    return json(
+      { client, instagram: request.url.indexOf("/instagram") },
+      { headers }
+    )
   } else {
     return redirect("/", 400)
   }
@@ -39,10 +42,9 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 
 export default function Client() {
   const { client } = useLoaderData<typeof loader>()
-
   const matches = useMatches()
-  const { states } = matches[1].data as DashboardDataType
 
+  const { states } = matches[1].data as DashboardDataType
   const { actions } = matches[3].data as { actions: Action[] }
 
   return (

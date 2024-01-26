@@ -1,12 +1,7 @@
 import { LoaderFunctionArgs } from "@remix-run/node"
 import { useLoaderData, useMatches } from "@remix-run/react"
-import invariant from "tiny-invariant"
-import { BlockOfActions, ListOfActions } from "~/components/structure/Action"
-import {
-  getActionsForThisDay,
-  getDelayedActions,
-  getNotFinishedActions,
-} from "~/lib/helpers"
+import { ListOfActions } from "~/components/structure/Action"
+import { getDelayedActions, sortActions } from "~/lib/helpers"
 import { SupabaseServerClient } from "~/lib/supabase"
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
@@ -32,18 +27,14 @@ export default function Actions() {
   const { categories, priorities, states, clients } = matches[1]
     .data as DashboardDataType
 
-  invariant(actions)
-
-  const lateActions = getDelayedActions({ actions })
-  const todayActions = getActionsForThisDay({ actions })
-  const notFinishedActions = getNotFinishedActions({ actions })
+  const lateActions = getDelayedActions({ actions: actions as Action[] })
 
   return (
     <div className="container overflow-hidden">
       {lateActions?.length ? (
-        <div className="mb-8">
-          <div className="flex justify-between py-2">
-            <h2 className="text-xl font-medium">
+        <div className="mb-4">
+          <div className="flex justify-between py-8">
+            <h2 className="text-3xl font-medium tracking-tight">
               Atrasados ({lateActions?.length})
             </h2>
           </div>
@@ -61,36 +52,21 @@ export default function Actions() {
         </div>
       ) : null}
 
-      <div className="mb-8">
-        <div className="flex justify-between py-2">
-          <h2 className="text-xl font-medium">Hoje ({todayActions?.length})</h2>
-        </div>
-
-        <BlockOfActions
-          categories={categories}
-          priorities={priorities}
-          states={states}
-          actions={todayActions}
-          clients={clients}
-        />
+      <div className="flex justify-between py-2">
+        <h2 className="mb-2 text-xl font-medium">
+          Todas as Ações ({actions?.length})
+        </h2>
       </div>
-      <div className="mb-8">
-        <div className="flex justify-between py-2">
-          <h2 className="text-xl font-medium">
-            Próximas ações ({notFinishedActions?.length})
-          </h2>
-        </div>
-
-        <ListOfActions
-          categories={categories}
-          priorities={priorities}
-          states={states}
-          actions={notFinishedActions}
-          max={3}
-          showCategory={true}
-          date={{ dateFormat: 2, timeFormat: 1 }}
-        />
-      </div>
+      <ListOfActions
+        categories={categories}
+        priorities={priorities}
+        states={states}
+        actions={sortActions(actions)}
+        showCategory={true}
+        max={3}
+        date={{ dateFormat: 1 }}
+        clients={clients}
+      />
     </div>
   )
 }

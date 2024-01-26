@@ -65,22 +65,25 @@ export function AvatarClient({
   client,
   size = "sm",
   style,
+  className,
 }: {
   client: Client
   size?: "xs" | "sm" | "md" | "lg"
   style?: CSSProperties
+  className?: string
 }) {
   return (
     <Avatar
-      className={
+      className={cn([
         size === "xs"
           ? "h-4 w-4"
           : size === "sm"
             ? "h-6 w-6"
             : size === "md"
               ? "h-8 w-8"
-              : "h-12 w-12"
-      }
+              : "h-12 w-12",
+        className,
+      ])}
       style={style}
     >
       <AvatarFallback
@@ -289,7 +292,7 @@ export function usePendingActions() {
       )
     })
     .map((fetcher) => {
-      const action = {
+      const action: Action = {
         id: String(fetcher.formData?.get("id")),
         title: String(fetcher.formData?.get("title")),
         description: String(fetcher.formData?.get("description")),
@@ -301,6 +304,9 @@ export function usePendingActions() {
         responsibles: String(fetcher.formData?.getAll("responsibles")).split(
           ","
         ),
+        created_at: String(fetcher.formData?.get("created_at")),
+        updated_at: String(fetcher.formData?.get("updated_at")),
+        priority_id: String(fetcher.formData?.get("priority_id")),
       }
 
       return { ...action }

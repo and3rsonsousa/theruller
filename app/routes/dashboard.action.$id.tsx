@@ -204,14 +204,14 @@ export default function ActionPage() {
               })
             }
             className="scrollbars shrink grow bg-transparent text-xl font-normal leading-normal outline-none transition"
-            onPaste={(e) => {
-              e.stopPropagation()
-              e.preventDefault()
-              setAction({
-                ...action,
-                description: e.clipboardData.getData("text"),
-              })
-            }}
+            // onPaste={(e) => {
+            //   e.stopPropagation()
+            //   e.preventDefault()
+            //   setAction({
+            //     ...action,
+            //     description: e.clipboardData.getData("text"),
+            //   })
+            // }}
           />
         </div>
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
@@ -267,7 +267,7 @@ export default function ActionPage() {
                 {categories.map((category) => (
                   <DropdownMenuItem
                     key={category.id}
-                    className="bg-item flex items-center gap-2"
+                    className="bg-item flex items-center gap-2 focus:bg-primary"
                     textValue={category.title}
                     onSelect={() =>
                       setAction({
@@ -300,7 +300,7 @@ export default function ActionPage() {
                 {states.map((state) => (
                   <DropdownMenuItem
                     key={state.id}
-                    className="bg-item flex items-center gap-2"
+                    className="bg-item flex items-center gap-2 focus:bg-primary"
                     textValue={state.title}
                     onSelect={() =>
                       setAction({
@@ -333,7 +333,7 @@ export default function ActionPage() {
                 {priorities.map((priority) => (
                   <DropdownMenuItem
                     key={priority.id}
-                    className="bg-item flex items-center gap-2"
+                    className="bg-item flex items-center gap-2 focus:bg-primary"
                     textValue={priority.title}
                     onSelect={() =>
                       setAction({

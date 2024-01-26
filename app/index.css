@@ -229,7 +229,32 @@
   @apply mr-4 bg-transparent;
 }
 .scrollbars::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-gray-300/15 outline-black/10 backdrop-blur-lg;
+  @apply rounded-full bg-gray-500/50 outline-black/10 backdrop-blur-lg;
+}
+
+.scrollbars-horizontal {
+  @apply h-full overflow-hidden overflow-x-auto pb-1;
+  scrollbars-gutter: stable;
+}
+
+.scrollbars-horizontal::-webkit-scrollbar {
+  @apply mb-4 block h-2;
+}
+.scrollbars-horizontal-thin::-webkit-scrollbar {
+  @apply mb-4 block h-1;
+}
+.scrollbars-horizontal::-webkit-scrollbar-button {
+  @apply hidden;
+}
+
+.scrollbars-horizontal::-webkit-scrollbar-track {
+  @apply mb-4 bg-transparent;
+}
+.scrollbars-horizontal::-webkit-scrollbar-track-piece {
+  @apply mr-4 bg-transparent;
+}
+.scrollbars-horizontal::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-gray-500/50 outline-black/10 backdrop-blur-lg;
 }
 
 .highlight {

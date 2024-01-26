@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import { LoaderFunctionArgs, json } from "@remix-run/node"
 import {
   Form,
@@ -111,10 +112,10 @@ export default function Client() {
 
   for (const id of idsToRemove) {
     _actions.delete(id)
-    actions.splice(
-      actions.findIndex((action) => action.id === id),
-      1
-    )
+    // actions.splice(
+    //   actions.findIndex((action) => action.id === id),
+    //   1
+    // )
   }
 
   actions = sortActions(Array.from(_actions, ([, v]) => v))
@@ -387,6 +388,7 @@ export const CalendarDay = ({
   setDraggedAction: React.Dispatch<React.SetStateAction<Action | undefined>>
 }) => {
   const [isHover, setIsHover] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
 
   const submit = useSubmit()
 
@@ -426,7 +428,7 @@ export const CalendarDay = ({
     <div
       className={`${
         !isSameMonth(day.date, currentDate) ? "hidden md:block" : ""
-      } group/day relative border-t bg-gradient-to-b py-2 transition hover:from-gray-900 hover:via-transparent md:px-1 md:pt-0`}
+      } group/day relative flex flex-col border-t bg-gradient-to-b pb-4 pt-2 transition hover:from-gray-900 hover:via-transparent md:px-1 md:pt-0`}
       data-date={format(day.date, "yyyy-MM-dd")}
       onDragOver={(e) => {
         e.stopPropagation()
@@ -454,17 +456,8 @@ export const CalendarDay = ({
         >
           {day.date.getDate()}
         </div>
-        {/* <div className="transition group-hover/day:opacity-100 md:opacity-0">
-      <CreateAction
-        mode="day"
-        date={day.date}
-        key={`${format(day.date, "yyyy-MM-dd")}-${
-          Math.random() * 10000
-        }`}
-      />
-    </div> */}
       </div>
-      <div className="relative flex flex-col gap-3">
+      <div className="relative flex shrink-0 grow flex-col gap-3">
         {categories
           .map((category) => ({
             category,
@@ -496,12 +489,13 @@ export const CalendarDay = ({
           )}
       </div>
       {isHover ? (
-        <div className={`absolute -bottom-1 z-10`}>
-          <div className="flex items-center gap-1 overflow-hidden rounded border border-white/10 bg-gray-950/50 p-1 ring-primary backdrop-blur-lg focus-within:ring-2">
-            <PlusIcon className="h-4 w-4 text-gray-500" />
+        <div
+          className={`absolute -bottom-2 left-1/2 z-10 mt-2 -translate-x-1/2  focus-within:relative`}
+        >
+          <div className="overflow-hidden rounded border border-white/10 bg-gray-950/50 p-1 ring-primary backdrop-blur-lg focus-within:ring-2">
             <Form
               method="post"
-              className="block"
+              className="flex items-center gap-1"
               action="/handle-actions"
               onSubmit={(e) => {
                 e.preventDefault()
@@ -523,9 +517,11 @@ export const CalendarDay = ({
             >
               <input
                 type="text"
+                id="title"
                 className="block w-full bg-transparent p-0 text-xs font-medium outline-none placeholder:text-gray-700 hover:placeholder:text-gray-400"
                 placeholder="Nova ação..."
                 name="title"
+                tabIndex={0}
                 onBlur={(e) => {
                   if (e.target.value.length > 2)
                     handleActions({
@@ -536,6 +532,23 @@ export const CalendarDay = ({
                     })
                 }}
               />
+
+              <button
+                type={isCreating ? "submit" : "button"}
+                onClick={(e) => {
+                  if (isCreating) {
+                    setIsCreating(false)
+                    console.log("OKOOO")
+                  } else {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setIsCreating(true)
+                    console.log("OK")
+                  }
+                }}
+              >
+                <PlusIcon className="h-4 w-4 text-gray-500" />
+              </button>
             </Form>
           </div>
         </div>

@@ -140,31 +140,34 @@ export interface Database {
       }
       clients: {
         Row: {
-          bgColor: string | null
+          bgColor: string
           created_at: string
-          fgColor: string | null
+          fgColor: string
           id: number
           short: string
           slug: string
           title: string
+          user_ids: string[]
         }
         Insert: {
-          bgColor?: string | null
+          bgColor?: string
           created_at?: string
-          fgColor?: string | null
+          fgColor?: string
           id?: number
           short: string
           slug: string
           title: string
+          user_ids: string[]
         }
         Update: {
-          bgColor?: string | null
+          bgColor?: string
           created_at?: string
-          fgColor?: string | null
+          fgColor?: string
           id?: number
           short?: string
           slug?: string
           title?: string
+          user_ids?: string[]
         }
         Relationships: []
       }

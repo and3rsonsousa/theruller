@@ -1,8 +1,15 @@
-import { Form, Link, useNavigate, useSubmit } from "@remix-run/react"
+import {
+  Form,
+  Link,
+  useFetcher,
+  useNavigate,
+  useSubmit,
+} from "@remix-run/react"
 import {
   addDays,
   addHours,
   addMonths,
+  addWeeks,
   format,
   formatDistanceToNow,
   isSameYear,
@@ -58,10 +65,13 @@ export function ActionLine({
   const [edit, setEdit] = useState(false)
   const [isHover, setHover] = useState(false)
   const navigate = useNavigate()
-
   const submit = useSubmit()
-  const buttonRef = useRef<HTMLButtonElement>(null)
+  const fetcher = useFetcher()
+
+  let title = action.title
+
   const inputRef = useRef<HTMLInputElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   function handleActions(data: {
     [key: string]: string | number | null | string[]
@@ -76,12 +86,16 @@ export function ActionLine({
     )
   }
 
+  if (fetcher.formData?.has("title")) {
+    title = String(fetcher.formData?.get("title"))
+  }
+
   return (
     <ContextMenu>
       <ContextMenuTrigger>
         <div
           title={action.title}
-          className={`group/action relative flex w-full select-none items-center justify-between gap-2 overflow-hidden rounded border-l-4 px-2 py-1 text-sm font-medium shadow outline-none ring-primary transition @[180px]:px-4 focus-within:ring-2 focus:ring-2 md:text-xs ${
+          className={`group/action  relative flex w-full select-none items-center gap-2 overflow-hidden rounded border-l-4 px-2 py-1 text-sm font-medium shadow outline-none ring-primary transition @[180px]:px-4 focus-within:ring-2 focus:ring-2 md:text-xs ${
             edit
               ? "bg-gray-950 text-gray-200"
               : "cursor-text bg-gray-900 hover:bg-gray-800 hover:text-gray-200"
@@ -113,68 +127,80 @@ export function ActionLine({
         >
           {/* Atalhos */}
           {isHover && !edit ? <ShortcutActions action={action} /> : null}
-          <div className="flex shrink grow items-center gap-2 overflow-hidden">
-            {showCategory && (
-              <Icons
-                id={
-                  categories.find(
-                    (category) => category.id === action.category_id
-                  )?.slug
-                }
-                className="h-4 w-4 text-gray-600"
-              />
-            )}
-            {client && <AvatarClient size="xs" client={client} />}
-            <div className="relative w-full shrink grow-0">
-              {edit ? (
-                <Form
-                  method="POST"
-                  onSubmit={() => {
-                    flushSync(() => {
-                      setEdit(false)
-                    })
-                    buttonRef.current?.focus()
+          {/* <div className=" flex shrink grow items-center gap-2 overflow-hidden"> */}
+          {showCategory && (
+            <Icons
+              id={
+                categories.find(
+                  (category) => category.id === action.category_id
+                )?.slug
+              }
+              className=" h-4 w-4 shrink-0 text-gray-600"
+            />
+          )}
+          {client && <AvatarClient size="xs" client={client} className="" />}
+          <div className=" relative w-full shrink grow">
+            {edit ? (
+              <fetcher.Form
+                method="POST"
+                action="/handle-actions"
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  flushSync(() => {
+                    setEdit(false)
+                    fetcher.submit(event.currentTarget)
+                  })
+                  buttonRef.current?.focus()
+                }}
+              >
+                <input
+                  type="hidden"
+                  name="intent"
+                  value={INTENTS.updateAction}
+                />
+                <input type="hidden" name="id" value={action.id} />
+                <input
+                  ref={inputRef}
+                  type="text"
+                  name="title"
+                  defaultValue={title}
+                  className="w-full bg-transparent outline-none"
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") {
+                      flushSync(() => {
+                        setEdit(() => false)
+                      })
+                      buttonRef.current?.focus()
+                    }
                   }}
-                >
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    defaultValue={action.title}
-                    className="w-full bg-transparent outline-none"
-                    onBlur={() => {
-                      if (
-                        inputRef.current?.value !== undefined &&
-                        inputRef.current?.value !== action.title
-                      )
-                        handleActions({
-                          intent: INTENTS.updateAction,
-                          ...action,
-                          title: inputRef.current?.value,
-                        })
+                  onBlur={(event) => {
+                    if (inputRef.current?.value !== action.title) {
+                      fetcher.submit(event.currentTarget.form)
+                    }
 
-                      setEdit(() => false)
-                    }}
-                  />
-                </Form>
-              ) : (
-                <button
-                  ref={buttonRef}
-                  className={`block w-full cursor-text overflow-hidden text-ellipsis text-nowrap text-left outline-none`}
-                  onClick={() => {
-                    flushSync(() => {
-                      setEdit(true)
-                    })
-                    inputRef.current?.select()
+                    setEdit(() => false)
                   }}
-                >
-                  {action.title}
-                </button>
-              )}
-            </div>
+                />
+              </fetcher.Form>
+            ) : (
+              <button
+                ref={buttonRef}
+                className={`block w-full cursor-text overflow-hidden text-ellipsis text-nowrap text-left outline-none`}
+                onClick={() => {
+                  flushSync(() => {
+                    setEdit(true)
+                  })
+                  inputRef.current?.select()
+                }}
+              >
+                {title}
+              </button>
+            )}
           </div>
+          {/* </div> */}
 
           {date && (
-            <div className="shrink grow-0 whitespace-nowrap text-right text-xs text-gray-500 md:text-[10px]">
+            <div className=" shrink grow-0 whitespace-nowrap text-right text-xs text-gray-500 md:text-[10px]">
               {formatActionDatetime({
                 date: action.date,
                 dateFormat: date.dateFormat,
@@ -253,9 +279,20 @@ export function ActionBlock({
             {edit ? (
               <Form
                 method="POST"
-                onSubmit={() => {
+                onSubmit={(event) => {
+                  event.preventDefault()
                   flushSync(() => {
                     setEdit(false)
+                    if (
+                      inputRef.current?.value !== undefined &&
+                      inputRef.current?.value !== action.title
+                    ) {
+                      handleActions({
+                        intent: INTENTS.updateAction,
+                        ...action,
+                        title: inputRef.current?.value,
+                      })
+                    }
                   })
                   buttonRef.current?.focus()
                 }}
@@ -611,7 +648,7 @@ function ShortcutActions({ action }: { action: Action }) {
       const key = event.key.toLowerCase()
       if (
         ["i", "f", "z", "a", "t", "c"].find((k) => k === key) &&
-        event.shiftKey
+        !event.shiftKey
       ) {
         let state_id = 0
         if (key === "i") {
@@ -638,9 +675,9 @@ function ShortcutActions({ action }: { action: Action }) {
           ...action,
           state_id,
         })
-      } else if (key === "e") {
+      } else if (key === "e" && event.shiftKey) {
         navigate(`/dashboard/action/${action.id}`)
-      } else if (key === "d") {
+      } else if (key === "d" && event.shiftKey) {
         handleActions({
           ...action,
           newId: window.crypto.randomUUID(),
@@ -648,7 +685,7 @@ function ShortcutActions({ action }: { action: Action }) {
           updated_at: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
           intent: INTENTS.duplicateAction,
         })
-      } else if (key === "x") {
+      } else if (key === "x" && event.shiftKey) {
         handleActions({ ...action, intent: INTENTS.deleteAction })
       } else if (key === ",") {
         handleActions({
@@ -662,47 +699,43 @@ function ShortcutActions({ action }: { action: Action }) {
           intent: INTENTS.updateAction,
           priority_id: PRIORITIES.medium,
         })
-      } else if (key === "/3") {
+      } else if (key === "/") {
         handleActions({
           ...action,
           intent: INTENTS.updateAction,
           priority_id: PRIORITIES.high,
         })
-      } else if (key === "h") {
-        const date = new Date()
-        date.setHours(date.getHours() + 1)
-
+      }
+      //Hoje
+      else if (key === "h" && event.shiftKey) {
         handleActions({
           ...action,
           intent: INTENTS.updateAction,
-          date: format(date, "yyyy-MM-dd HH:mm:ss"),
+          date: format(addHours(new Date(), 1), "yyyy-MM-dd HH:mm:ss"),
         })
-      } else if (key === "a") {
+      }
+      // Amanhã
+      else if (key === "a" && event.shiftKey) {
         handleActions({
           ...action,
           intent: INTENTS.updateAction,
-          date: format(
-            parseISO(action.date).setDate(addDays(new Date(), 1).getDate()),
-            "yyyy-MM-dd HH:mm:ss"
-          ),
+          date: format(addDays(new Date(), 1), "yyyy-MM-dd HH:mm:ss"),
         })
-      } else if (key === "s") {
+      }
+      // Adiciona uma semana
+      else if (key === "s" && event.shiftKey) {
         handleActions({
           ...action,
           intent: INTENTS.updateAction,
-          date: format(
-            parseISO(action.date).setDate(addDays(new Date(), 7).getDate()),
-            "yyyy-MM-dd HH:mm:ss"
-          ),
+          date: format(addWeeks(action.date, 1), "yyyy-MM-dd HH:mm:ss"),
         })
-      } else if (key === "m") {
+      }
+      // Adiciona um mês
+      else if (key === "m" && event.shiftKey) {
         handleActions({
           ...action,
           intent: INTENTS.updateAction,
-          date: format(
-            parseISO(action.date).setMonth(addMonths(new Date(), 1).getMonth()),
-            "yyyy-MM-dd HH:mm:ss"
-          ),
+          date: format(addMonths(action.date, 1), "yyyy-MM-dd HH:mm:ss"),
         })
       }
     }

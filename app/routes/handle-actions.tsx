@@ -33,6 +33,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     return json({ data, error }, { headers })
   } else if (intent === INTENTS.updateAction) {
+    if (!id) throw new Error("No id was provided")
+
     if (values["responsibles"]) {
       const { data, error } = await supabase
         .from("actions")
