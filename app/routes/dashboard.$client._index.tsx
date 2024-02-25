@@ -11,8 +11,10 @@ import {
 import {
   addMonths,
   eachDayOfInterval,
+  eachMonthOfInterval,
   endOfMonth,
   endOfWeek,
+  endOfYear,
   format,
   isSameDay,
   isSameMonth,
@@ -20,6 +22,7 @@ import {
   parseISO,
   startOfMonth,
   startOfWeek,
+  startOfYear,
   subMonths,
 } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -32,6 +35,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/ui/dropdown-menu"
 import { INTENTS, POST_ID, PRIORITIES } from "~/lib/constants"
@@ -77,14 +81,15 @@ export default function Client() {
   const { client } = useLoaderData<typeof loader>()
   const [searchParams] = useSearchParams()
 
-  invariant(client)
+  const matches = useMatches()
+  const submit = useSubmit()
 
   const [draggedAction, setDraggedAction] = useState<Action>()
   const [stateFilter, setStateFilter] = useState<State>()
   const [categoryFilter, setCategoryFilter] = useState<Category[]>([])
 
-  const matches = useMatches()
-  const submit = useSubmit()
+  invariant(client)
+  invariant(actions)
 
   const { categories, priorities, states, user, people } = matches[1]
     .data as DashboardDataType
@@ -92,9 +97,7 @@ export default function Client() {
   const date = searchParams.get("date") || format(new Date(), "yyyy-MM-dd")
   const currentDate = parseISO(date)
 
-  invariant(actions)
-
-  const _actions = new Map<string, Action>(
+  const actionsMap = new Map<string, Action>(
     actions.map((action) => [action.id, action])
   )
 
@@ -107,18 +110,14 @@ export default function Client() {
   const idsToRemove = useIDsToRemove()
 
   for (const action of pendingActions as Action[]) {
-    _actions.set(action.id, action)
+    actionsMap.set(action.id, action)
   }
 
   for (const id of idsToRemove) {
-    _actions.delete(id)
-    // actions.splice(
-    //   actions.findIndex((action) => action.id === id),
-    //   1
-    // )
+    actionsMap.delete(id)
   }
 
-  actions = sortActions(Array.from(_actions, ([, v]) => v))
+  actions = sortActions(Array.from(actionsMap, ([, v]) => v))
 
   const calendar = days.map((day) => {
     return {
@@ -190,9 +189,32 @@ export default function Client() {
         className="container z-10 bg-background/25 backdrop-blur-lg"
       >
         <div className="flex items-center justify-between py-2">
-          <div className="flex items-center gap-1 text-xl font-semibold capitalize">
+          <div className="flex items-center gap-1 text-xl font-semibold ">
             <div className="mr-4">
-              {format(currentDate, "MMMM", { locale: ptBR })}
+              <DropdownMenu>
+                <DropdownMenuTrigger className="capitalize outline-none">
+                  {format(currentDate, "MMMM", { locale: ptBR })}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-content">
+                  {eachMonthOfInterval({
+                    start: startOfYear(new Date()),
+                    end: endOfYear(new Date()),
+                  }).map((month) => (
+                    <DropdownMenuItem
+                      className="bg-item capitalize"
+                      key={month.getMonth()}
+                      onSelect={() => {}}
+                      asChild
+                    >
+                      <Link
+                        to={`/dashboard/${client.slug}/?date=${format(new Date().setMonth(month.getMonth()), "yyyy-MM-'01'")}`}
+                      >
+                        {format(month, "MMMM", { locale: ptBR })}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <Button size="icon" variant="ghost" asChild>
               <Link
@@ -488,7 +510,7 @@ export const CalendarDay = ({
             ) : null
           )}
       </div>
-      {isHover ? (
+      {isHover || isCreating ? (
         <div
           className={`absolute -bottom-2 left-1/2 z-10 mt-2 -translate-x-1/2  focus-within:relative`}
         >
@@ -522,7 +544,11 @@ export const CalendarDay = ({
                 placeholder="Nova ação..."
                 name="title"
                 tabIndex={0}
+                onFocus={() => {
+                  setIsCreating(true)
+                }}
                 onBlur={(e) => {
+                  setIsCreating(false)
                   if (e.target.value.length > 2)
                     handleActions({
                       ...newAction,
@@ -538,12 +564,10 @@ export const CalendarDay = ({
                 onClick={(e) => {
                   if (isCreating) {
                     setIsCreating(false)
-                    console.log("OKOOO")
                   } else {
                     e.preventDefault()
                     e.stopPropagation()
                     setIsCreating(true)
-                    console.log("OK")
                   }
                 }}
               >

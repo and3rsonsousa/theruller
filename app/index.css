@@ -229,7 +229,7 @@
   @apply mr-4 bg-transparent;
 }
 .scrollbars::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-gray-500/50 outline-black/10 backdrop-blur-lg;
+  @apply rounded-full bg-transparent outline-black/10 backdrop-blur-lg transition hover:bg-gray-500/25;
 }
 
 .scrollbars-horizontal {
@@ -254,7 +254,7 @@
   @apply mr-4 bg-transparent;
 }
 .scrollbars-horizontal::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-gray-500/50 outline-black/10 backdrop-blur-lg;
+  @apply rounded-full bg-transparent outline-black/10 backdrop-blur-lg transition hover:bg-gray-500/25;
 }
 
 .highlight {

@@ -1,10 +1,4 @@
-import {
-  Form,
-  Link,
-  useFetcher,
-  useNavigate,
-  useSubmit,
-} from "@remix-run/react"
+import { Form, Link, useNavigate, useSubmit } from "@remix-run/react"
 import {
   addDays,
   addHours,
@@ -66,9 +60,6 @@ export function ActionLine({
   const [isHover, setHover] = useState(false)
   const navigate = useNavigate()
   const submit = useSubmit()
-  const fetcher = useFetcher()
-
-  let title = action.title
 
   const inputRef = useRef<HTMLInputElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -86,16 +77,12 @@ export function ActionLine({
     )
   }
 
-  if (fetcher.formData?.has("title")) {
-    title = String(fetcher.formData?.get("title"))
-  }
-
   return (
     <ContextMenu>
       <ContextMenuTrigger>
         <div
           title={action.title}
-          className={`group/action  relative flex w-full select-none items-center gap-2 overflow-hidden rounded border-l-4 px-2 py-1 text-sm font-medium shadow outline-none ring-primary transition @[180px]:px-4 focus-within:ring-2 focus:ring-2 md:text-xs ${
+          className={`group/action relative flex w-full select-none items-center gap-2 overflow-hidden rounded border-l-4 px-2 py-1 text-sm font-medium shadow outline-none ring-primary transition @[180px]:px-4 focus-within:ring-2 focus:ring-2 md:text-xs ${
             edit
               ? "bg-gray-950 text-gray-200"
               : "cursor-text bg-gray-900 hover:bg-gray-800 hover:text-gray-200"
@@ -139,49 +126,50 @@ export function ActionLine({
             />
           )}
           {client && <AvatarClient size="xs" client={client} className="" />}
-          <div className=" relative w-full shrink grow">
+          <div className="relative w-full shrink overflow-hidden">
             {edit ? (
-              <fetcher.Form
-                method="POST"
-                action="/handle-actions"
-                onSubmit={(event) => {
-                  event.preventDefault()
-                  flushSync(() => {
-                    setEdit(false)
-                    fetcher.submit(event.currentTarget)
-                  })
-                  buttonRef.current?.focus()
-                }}
-              >
-                <input
-                  type="hidden"
-                  name="intent"
-                  value={INTENTS.updateAction}
-                />
-                <input type="hidden" name="id" value={action.id} />
-                <input
-                  ref={inputRef}
-                  type="text"
-                  name="title"
-                  defaultValue={title}
-                  className="w-full bg-transparent outline-none"
-                  onKeyDown={(event) => {
-                    if (event.key === "Escape") {
+              <input
+                ref={inputRef}
+                type="text"
+                name="title"
+                defaultValue={action.title}
+                className="w-full bg-transparent outline-none"
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
+                    flushSync(() => {
+                      setEdit(() => false)
+                    })
+                    buttonRef.current?.focus()
+                  } else if (event.key === "Enter") {
+                    event.preventDefault()
+                    if (inputRef.current?.value !== action.title) {
                       flushSync(() => {
-                        setEdit(() => false)
+                        handleActions({
+                          intent: INTENTS.updateAction,
+                          ...action,
+                          title: String(inputRef.current?.value),
+                        })
                       })
+
                       buttonRef.current?.focus()
                     }
-                  }}
-                  onBlur={(event) => {
-                    if (inputRef.current?.value !== action.title) {
-                      fetcher.submit(event.currentTarget.form)
-                    }
-
                     setEdit(() => false)
-                  }}
-                />
-              </fetcher.Form>
+                  }
+                }}
+                onBlur={(event) => {
+                  event.preventDefault()
+                  if (inputRef.current?.value !== action.title) {
+                    flushSync(() => {
+                      handleActions({
+                        intent: INTENTS.updateAction,
+                        ...action,
+                        title: String(inputRef.current?.value),
+                      })
+                    })
+                  }
+                  setEdit(() => false)
+                }}
+              />
             ) : (
               <button
                 ref={buttonRef}
@@ -193,7 +181,7 @@ export function ActionLine({
                   inputRef.current?.select()
                 }}
               >
-                {title}
+                {action.title}
               </button>
             )}
           </div>
@@ -482,7 +470,7 @@ export function ListOfActions({
   clients,
   showCategory,
   date,
-  max,
+  columns = 1,
   onDrag,
   isFoldable,
 }: {
@@ -493,22 +481,31 @@ export function ListOfActions({
   clients?: Client[]
   showCategory?: boolean
   date?: { dateFormat?: 0 | 1 | 2 | 3 | 4; timeFormat?: 0 | 1 }
-  max?: 1 | 2 | 3
+  columns?: 1 | 2 | 3
   onDrag?: (action: Action) => void
   isFoldable?: boolean
 }) {
-  const foldCount = (max || 2) * 4
+  const foldCount = columns * 4
   const [fold, setFold] = useState(isFoldable ? foldCount : undefined)
   return (
     <>
       <div
-        className={`min-h-full @container ${
-          max === 2
+        className={`min-h-full ${
+          columns === 2
             ? "grid sm:grid-cols-2"
-            : max === 3
+            : columns === 3
               ? "grid sm:grid-cols-2 md:grid-cols-3"
               : "flex flex-col"
-        }  gap-x-4 gap-y-1`}
+        } grid-flow-col gap-x-4 gap-y-1 @container`}
+        style={
+          columns > 1
+            ? {
+                gridTemplateRows: `repeat(${Math.ceil(
+                  (actions?.slice(0, fold).length || columns) / columns
+                )}, minmax(0, 1fr))`,
+              }
+            : undefined
+        }
       >
         {actions
           ?.slice(0, fold)
@@ -846,15 +843,15 @@ function ContextMenuItems({
               {
                 periods: [
                   {
-                    time: addHours(parseISO(action.date), 1),
+                    time: addHours(new Date(), 1),
                     text: "daqui a 1 hora",
                   },
                   {
-                    time: addHours(parseISO(action.date), 3),
+                    time: addHours(new Date(), 3),
                     text: "daqui a 3 horas",
                   },
                   {
-                    time: addHours(parseISO(action.date), 8),
+                    time: addHours(new Date(), 8),
                     text: "daqui a 8 horas",
                   },
                 ],

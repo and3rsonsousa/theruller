@@ -39,11 +39,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     .select("*")
     .gte(
       "date",
-      format(startOfDay(startOfMonth(new Date())), "yyyy-MM-dd HH:mm:ss")
+      format(
+        startOfDay(startOfWeek(startOfMonth(new Date()))),
+        "yyyy-MM-dd HH:mm:ss"
+      )
     )
     .lte(
       "date",
-      format(endOfDay(endOfMonth(new Date())), "yyyy-MM-dd HH:mm:ss")
+      format(
+        endOfDay(endOfWeek(endOfMonth(addMonths(new Date(), 1)))),
+        "yyyy-MM-dd HH:mm:ss"
+      )
     )
 
   return json({ actions }, { headers })
@@ -62,15 +68,15 @@ export default function DashboardIndex() {
 
   invariant(actions)
 
-  const actionsMap = new Map<string, Action>(
-    actions.map((action) => [action.id, action])
-  )
-
   const { categories, priorities, states, clients } = matches[1]
     .data as DashboardDataType
 
   const pendingActions = usePendingActions()
   const idsToRemove = useIDsToRemove()
+
+  const actionsMap = new Map<string, Action>(
+    actions.map((action) => [action.id, action])
+  )
 
   for (const action of pendingActions as Action[]) {
     actionsMap.set(action.id, action)
@@ -119,7 +125,7 @@ export default function DashboardIndex() {
               states={states}
               actions={lateActions}
               showCategory={true}
-              max={3}
+              columns={3}
               date={{ dateFormat: 1 }}
               clients={clients}
             />
@@ -128,7 +134,7 @@ export default function DashboardIndex() {
         {/* Clientes - Parceiros - Contas */}
         <div className="mb-8 mt-4">
           <h4 className="mb-4 text-xl font-medium">Contas</h4>
-          <div className="flow mx-auto grid w-auto grid-cols-4 flex-wrap justify-center gap-4 sm:grid-cols-6 lg:grid-cols-12">
+          <div className="flow mx-auto flex w-auto flex-wrap justify-center gap-4">
             {clients.map((client) => (
               <Link
                 to={`/dashboard/${client.slug}`}
@@ -151,7 +157,7 @@ export default function DashboardIndex() {
                 Hoje ({todayActions?.length})
               </h2>
             </div>
-            <div className="scrollbars-horizontal scrollbars-horizontal-thin ">
+            <div className="scrollbars-horizontal scrollbars-horizontal ">
               <div className="flex w-full gap-4 pb-4">
                 {states.map((state) => (
                   <div className="min-w-72" key={state.id}>
@@ -204,7 +210,7 @@ export default function DashboardIndex() {
                 states={states}
                 actions={tomorrowActions}
                 clients={clients}
-                max={2}
+                columns={2}
                 date={{
                   dateFormat: 0,
                   timeFormat: 1,
@@ -231,9 +237,11 @@ export default function DashboardIndex() {
               end: endOfWeek(new Date()),
             }).map((day) => (
               <div key={day.getDate()}>
-                <div className="pb-4 text-sm font-medium capitalize">
-                  {" "}
-                  {format(day, "EEEE", { locale: ptBR })}{" "}
+                <div className="overflow-hidden text-ellipsis text-nowrap font-semibold capitalize tracking-tight">
+                  {format(day, "EEEE ", { locale: ptBR })}{" "}
+                </div>
+                <div className="mb-4 text-[10px] uppercase tracking-widest text-muted-foreground">
+                  {format(day, "d 'de' MMMM", { locale: ptBR })}
                 </div>
                 <ListOfActions
                   categories={categories}
@@ -271,7 +279,7 @@ export default function DashboardIndex() {
                 isThisMonth(action.date)
               )}
               showCategory={true}
-              max={3}
+              columns={3}
               date={{ dateFormat: 2, timeFormat: 1 }}
               clients={clients}
               isFoldable={true}
@@ -294,7 +302,7 @@ export default function DashboardIndex() {
                 isSameMonth(action.date, addMonths(new Date(), 1))
               )}
               showCategory={true}
-              max={3}
+              columns={3}
               date={{ dateFormat: 2, timeFormat: 1 }}
               clients={clients}
               isFoldable={true}
