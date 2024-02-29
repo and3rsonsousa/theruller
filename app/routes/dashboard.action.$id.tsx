@@ -431,6 +431,7 @@ export default function ActionPage() {
                 <Calendar
                   mode="single"
                   selected={parseISO(action.date)}
+                  locale={ptBR}
                   onSelect={(date) => {
                     if (date) {
                       date?.setHours(
