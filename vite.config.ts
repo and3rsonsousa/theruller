@@ -10,7 +10,7 @@ export default defineConfig({
     remix(),
     vanillaExtractPlugin(),
     vercelServerlessPreset({
-      regions: "iad1",
+      regions: "sin1",
       cleanUrls: true,
       cacheFiles: [
         "favicon.svg",
