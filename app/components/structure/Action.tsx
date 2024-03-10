@@ -643,6 +643,8 @@ function ShortcutActions({ action }: { action: Action }) {
   useEffect(() => {
     const keyDown = async function (event: KeyboardEvent) {
       const key = event.key.toLowerCase()
+      const code = event.code
+
       if (
         ["i", "f", "z", "a", "t", "c"].find((k) => k === key) &&
         !event.shiftKey
@@ -671,6 +673,59 @@ function ShortcutActions({ action }: { action: Action }) {
           intent: INTENTS.updateAction,
           ...action,
           state_id,
+        })
+      }
+      if (
+        [
+          "KeyT",
+          "KeyP",
+          "KeyV",
+          "KeyS",
+          "KeyC",
+          "KeyI",
+          "KeyR",
+          "KeyF",
+          "KeyD",
+          "KeyA",
+        ].find((k) => k === code) &&
+        event.altKey
+      ) {
+        let category_id = 0
+        if (code === "KeyT") {
+          category_id = 4
+        }
+        if (code === "KeyP") {
+          category_id = 1
+        }
+        if (code === "KeyV") {
+          category_id = 2
+        }
+        if (code === "KeyS") {
+          category_id = 3
+        }
+        if (code === "KeyC") {
+          category_id = 8
+        }
+        if (code === "KeyI") {
+          category_id = 6
+        }
+        if (code === "KeyR") {
+          category_id = 7
+        }
+        if (code === "KeyF") {
+          category_id = 5
+        }
+        if (code === "KeyD") {
+          category_id = 9
+        }
+        if (code === "KeyA") {
+          category_id = 10
+        }
+
+        handleActions({
+          intent: INTENTS.updateAction,
+          ...action,
+          category_id,
         })
       } else if (key === "e" && event.shiftKey) {
         navigate(`/dashboard/action/${action.id}`)

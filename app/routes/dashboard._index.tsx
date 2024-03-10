@@ -142,9 +142,9 @@ export default function DashboardIndex() {
                 className="group relative"
               >
                 <AvatarClient client={client} size="lg" className="mx-auto" />
-                <div className="absolute w-full -translate-y-4 text-center text-xs font-medium leading-tight opacity-0 transition duration-500 group-hover:translate-y-2 group-hover:opacity-100">
+                {/* <div className="absolute w-full -translate-y-4 overflow-hidden  text-center text-[10px] font-medium uppercase leading-tight opacity-100 transition duration-500 group-hover:translate-y-2 group-hover:opacity-100">
                   {client.title}
-                </div>
+                </div> */}
               </Link>
             ))}
           </div>

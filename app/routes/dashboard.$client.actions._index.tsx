@@ -45,7 +45,6 @@ export default function Actions() {
             states={states}
             actions={lateActions}
             showCategory={true}
-            max={3}
             date={{ dateFormat: 1 }}
             clients={clients}
           />
@@ -63,7 +62,6 @@ export default function Actions() {
         states={states}
         actions={sortActions(actions)}
         showCategory={true}
-        max={3}
         date={{ dateFormat: 1 }}
         clients={clients}
       />

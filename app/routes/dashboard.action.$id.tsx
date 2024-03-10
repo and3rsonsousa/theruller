@@ -191,6 +191,20 @@ export default function ActionPage() {
           <div className="mb-2 flex items-center gap-4 text-xs font-medium uppercase tracking-wider">
             <div>Descrição</div>
           </div>
+          {/* <textarea
+            name="description"
+            id="description"
+            className="scrollbars shrink grow bg-transparent text-xl font-normal leading-normal outline-none transition"
+            rows={10}
+            onBlur={(e) =>
+              setAction({
+                ...action,
+                description: e.currentTarget.innerHTML,
+              })
+            }
+          >
+            {action?.description}
+          </textarea> */}
           <div
             id="description"
             contentEditable="true"
@@ -204,14 +218,20 @@ export default function ActionPage() {
               })
             }
             className="scrollbars shrink grow bg-transparent text-xl font-normal leading-normal outline-none transition"
-            // onPaste={(e) => {
-            //   e.stopPropagation()
-            //   e.preventDefault()
-            //   setAction({
-            //     ...action,
-            //     description: e.clipboardData.getData("text"),
-            //   })
-            // }}
+            onPaste={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              const text = e.clipboardData.getData("text/plain")
+              const range = window.getSelection()?.getRangeAt(0)
+              range?.insertNode(document.createTextNode(text))
+
+              // setAction({
+              //   ...action,
+              //   description: action.description?.concat(
+              //     e.clipboardData.getData("text")
+              //   ) as string,
+              // })
+            }}
           />
         </div>
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
