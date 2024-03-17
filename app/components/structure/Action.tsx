@@ -774,6 +774,14 @@ function ShortcutActions({ action }: { action: Action }) {
           date: format(addDays(new Date(), 1), "yyyy-MM-dd HH:mm:ss"),
         })
       }
+      // Próxima semana a partir de hoje
+      else if (key === "p" && event.shiftKey) {
+        handleActions({
+          ...action,
+          intent: INTENTS.updateAction,
+          date: format(addWeeks(new Date(), 1), "yyyy-MM-dd HH:mm:ss"),
+        })
+      }
       // Adiciona uma semana
       else if (key === "s" && event.shiftKey) {
         handleActions({

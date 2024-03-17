@@ -188,7 +188,7 @@ export default function DashboardIndex() {
           </div>
         ) : (
           <div className="grid place-content-center p-8 text-xl">
-            <div className="space-y-4 rounded-lg bg-gray-900 p-8 text-center">
+            <div className="space-y-4 rounded-xl bg-gray-900 p-8 text-center">
               <div>Nenhuma ação para hoje</div>
               <CreateAction mode="button" />
             </div>
