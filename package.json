@@ -49,6 +49,7 @@
     "@supabase/supabase-js": "2.39.8",
     "@tailwindcss/container-queries": "^0.1.1",
     "@vanilla-extract/vite-plugin": "4.0.6",
+    "@vercel/remix": "^2.8.1-patch.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "2.1.0",
     "cmdk": "1.0.0",
