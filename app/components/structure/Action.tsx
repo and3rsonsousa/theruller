@@ -2,6 +2,7 @@ import { Form, Link, useNavigate, useSubmit } from "@remix-run/react"
 import {
   addDays,
   addHours,
+  addMinutes,
   addMonths,
   addWeeks,
   format,
@@ -758,12 +759,36 @@ function ShortcutActions({ action }: { action: Action }) {
           priority_id: PRIORITIES.high,
         })
       }
+      //em uma hora
+      else if (code === "Digit1" && event.shiftKey) {
+        handleActions({
+          ...action,
+          intent: INTENTS.updateAction,
+          date: format(addHours(new Date(), 1), "yyyy-MM-dd HH:mm:ss"),
+        })
+      }
+      //em duas horas
+      else if (code === "Digit2" && event.shiftKey) {
+        handleActions({
+          ...action,
+          intent: INTENTS.updateAction,
+          date: format(addHours(new Date(), 2), "yyyy-MM-dd HH:mm:ss"),
+        })
+      }
+      //em três horas
+      else if (code === "Digit3" && event.shiftKey) {
+        handleActions({
+          ...action,
+          intent: INTENTS.updateAction,
+          date: format(addHours(new Date(), 3), "yyyy-MM-dd HH:mm:ss"),
+        })
+      }
       //Hoje
       else if (key === "h" && event.shiftKey) {
         handleActions({
           ...action,
           intent: INTENTS.updateAction,
-          date: format(addHours(new Date(), 1), "yyyy-MM-dd HH:mm:ss"),
+          date: format(addMinutes(new Date(), 30), "yyyy-MM-dd HH:mm:ss"),
         })
       }
       // Amanhã
