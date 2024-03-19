@@ -1,5 +1,5 @@
 import { LoaderFunctionArgs, MetaFunction, json } from "@remix-run/node"
-import { Link, useLoaderData, useMatches } from "@remix-run/react"
+import { Link, useLoaderData, useMatches, useSubmit } from "@remix-run/react"
 import {
   addDays,
   addMonths,
@@ -16,10 +16,12 @@ import {
   startOfWeek,
 } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { useEffect, useState } from "react"
 import invariant from "tiny-invariant"
 import { ListOfActions } from "~/components/structure/Action"
 import CreateAction from "~/components/structure/CreateAction"
 import Progress from "~/components/structure/Progress"
+import { INTENTS } from "~/lib/constants"
 import {
   AvatarClient,
   getActionsForThisDay,
@@ -65,6 +67,8 @@ export const meta: MetaFunction = () => {
 export default function DashboardIndex() {
   let { actions } = useLoaderData<typeof loader>()
   const matches = useMatches()
+  const submit = useSubmit()
+  const [draggedAction, setDraggedAction] = useState<Action>()
 
   invariant(actions)
 
@@ -95,6 +99,34 @@ export default function DashboardIndex() {
     date: addDays(new Date(), 1),
   })
   const notFinishedActions = getNotFinishedActions({ actions })
+
+  useEffect(() => {
+    if (draggedAction) {
+      const day = document.querySelector(".dragover") as HTMLElement
+      const date = day?.getAttribute("data-date") as string
+
+      //
+      submit(
+        {
+          ...draggedAction,
+          date: date?.concat(
+            `T${new Date(draggedAction.date).getHours()}:${new Date(
+              draggedAction.date
+            ).getMinutes()}`
+          ),
+          intent: INTENTS.updateAction,
+        },
+        {
+          action: "/handle-actions",
+          method: "POST",
+          navigate: false,
+          fetcherKey: `action:${draggedAction.id}:update:move:calendar`,
+        }
+      )
+      //reset
+      setDraggedAction(undefined)
+    }
+  }, [draggedAction, submit])
 
   return (
     <div className="container overflow-hidden">
@@ -236,7 +268,18 @@ export default function DashboardIndex() {
               start: startOfWeek(new Date()),
               end: endOfWeek(new Date()),
             }).map((day) => (
-              <div key={day.getDate()}>
+              <div
+                key={day.getDate()}
+                data-date={format(day, "yyyy-MM-dd")}
+                onDragOver={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  document
+                    .querySelectorAll(".dragover")
+                    .forEach((e) => e.classList.remove("dragover"))
+                  e.currentTarget.classList.add("dragover")
+                }}
+              >
                 <div className="overflow-hidden text-ellipsis text-nowrap font-semibold capitalize tracking-tight">
                   {format(day, "EEEE ", { locale: ptBR })}{" "}
                 </div>
@@ -253,6 +296,7 @@ export default function DashboardIndex() {
                   clients={clients}
                   date={{ timeFormat: 1 }}
                   showCategory={true}
+                  onDrag={setDraggedAction}
                 />
               </div>
             ))}
