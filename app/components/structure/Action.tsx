@@ -7,6 +7,7 @@ import {
   addWeeks,
   format,
   formatDistanceToNow,
+  isBefore,
   isSameYear,
   parseISO,
 } from "date-fns"
@@ -764,7 +765,12 @@ function ShortcutActions({ action }: { action: Action }) {
         handleActions({
           ...action,
           intent: INTENTS.updateAction,
-          date: format(addHours(new Date(), 1), "yyyy-MM-dd HH:mm:ss"),
+          date: format(
+            isBefore(action.date, new Date())
+              ? addHours(new Date(), 1)
+              : addHours(action.date, 1),
+            "yyyy-MM-dd HH:mm:ss"
+          ),
         })
       }
       //em duas horas
@@ -772,7 +778,12 @@ function ShortcutActions({ action }: { action: Action }) {
         handleActions({
           ...action,
           intent: INTENTS.updateAction,
-          date: format(addHours(new Date(), 2), "yyyy-MM-dd HH:mm:ss"),
+          date: format(
+            isBefore(action.date, new Date())
+              ? addHours(new Date(), 2)
+              : addHours(action.date, 2),
+            "yyyy-MM-dd HH:mm:ss"
+          ),
         })
       }
       //em três horas
@@ -780,7 +791,12 @@ function ShortcutActions({ action }: { action: Action }) {
         handleActions({
           ...action,
           intent: INTENTS.updateAction,
-          date: format(addHours(new Date(), 3), "yyyy-MM-dd HH:mm:ss"),
+          date: format(
+            isBefore(action.date, new Date())
+              ? addHours(new Date(), 3)
+              : addHours(action.date, 3),
+            "yyyy-MM-dd HH:mm:ss"
+          ),
         })
       }
       //Hoje
@@ -799,20 +815,18 @@ function ShortcutActions({ action }: { action: Action }) {
           date: format(addDays(new Date(), 1), "yyyy-MM-dd HH:mm:ss"),
         })
       }
-      // Próxima semana a partir de hoje
-      else if (key === "p" && event.shiftKey) {
-        handleActions({
-          ...action,
-          intent: INTENTS.updateAction,
-          date: format(addWeeks(new Date(), 1), "yyyy-MM-dd HH:mm:ss"),
-        })
-      }
+
       // Adiciona uma semana
       else if (key === "s" && event.shiftKey) {
         handleActions({
           ...action,
           intent: INTENTS.updateAction,
-          date: format(addWeeks(action.date, 1), "yyyy-MM-dd HH:mm:ss"),
+          date: format(
+            isBefore(action.date, new Date())
+              ? addWeeks(new Date(), 1)
+              : addWeeks(action.date, 1),
+            "yyyy-MM-dd HH:mm:ss"
+          ),
         })
       }
       // Adiciona um mês
@@ -820,7 +834,12 @@ function ShortcutActions({ action }: { action: Action }) {
         handleActions({
           ...action,
           intent: INTENTS.updateAction,
-          date: format(addMonths(action.date, 1), "yyyy-MM-dd HH:mm:ss"),
+          date: format(
+            isBefore(action.date, new Date())
+              ? addMonths(new Date(), 1)
+              : addMonths(action.date, 1),
+            "yyyy-MM-dd HH:mm:ss"
+          ),
         })
       }
     }
