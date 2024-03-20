@@ -16,11 +16,13 @@ import {
   startOfWeek,
 } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { CalendarClock, KanbanIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import invariant from "tiny-invariant"
 import { ListOfActions } from "~/components/structure/Action"
 import CreateAction from "~/components/structure/CreateAction"
 import Progress from "~/components/structure/Progress"
+import { Button } from "~/components/ui/ui/button"
 import { INTENTS } from "~/lib/constants"
 import {
   AvatarClient,
@@ -69,6 +71,7 @@ export default function DashboardIndex() {
   const matches = useMatches()
   const submit = useSubmit()
   const [draggedAction, setDraggedAction] = useState<Action>()
+  const [todayView, setTodayView] = useState<"kanban" | "hours">("hours")
 
   invariant(actions)
 
@@ -188,35 +191,88 @@ export default function DashboardIndex() {
               <h2 className="text-3xl font-medium tracking-tight">
                 Hoje ({todayActions?.length})
               </h2>
+              <div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setTodayView(() =>
+                      todayView === "hours" ? "kanban" : "hours"
+                    )
+                  }}
+                >
+                  {todayView === "kanban" ? (
+                    <KanbanIcon className="w-6" />
+                  ) : (
+                    <CalendarClock className="w-6" />
+                  )}
+                </Button>
+              </div>
             </div>
-            <div className="scrollbars-horizontal scrollbars-horizontal ">
-              <div className="flex w-full gap-4 pb-4">
-                {states.map((state) => (
-                  <div className="min-w-72" key={state.id}>
-                    <div className="mb-2 flex items-center gap-2">
-                      <div
-                        className={`size-4 rounded-full border-4 border-${state.slug}`}
-                      ></div>
-                      <h4 className="font-medium">{state.title}</h4>
+            {todayView === "kanban" ? (
+              <div className="scrollbars-horizontal scrollbars-horizontal ">
+                <div className="flex w-full gap-4 pb-4">
+                  {states.map((state) => (
+                    <div className="min-w-72" key={state.id}>
+                      <div className="mb-2 flex items-center gap-2">
+                        <div
+                          className={`size-4 rounded-full border-4 border-${state.slug}`}
+                        ></div>
+                        <h4 className="font-medium">{state.title}</h4>
+                      </div>
+                      <ListOfActions
+                        categories={categories}
+                        priorities={priorities}
+                        states={states}
+                        clients={clients}
+                        showCategory={true}
+                        date={{
+                          dateFormat: 0,
+                          timeFormat: 1,
+                        }}
+                        actions={todayActions.filter(
+                          (action) => action.state_id === state.id
+                        )}
+                      />
                     </div>
-                    <ListOfActions
-                      categories={categories}
-                      priorities={priorities}
-                      states={states}
-                      clients={clients}
-                      showCategory={true}
-                      date={{
-                        dateFormat: 0,
-                        timeFormat: 1,
-                      }}
-                      actions={todayActions.filter(
-                        (action) => action.state_id === state.id
-                      )}
-                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  [0, 1, 2, 3, 4, 5],
+                  [6, 7, 8, 9, 10, 11],
+                  [12, 13, 14, 15, 16, 17],
+                  [18, 19, 20, 21, 22, 23],
+                ].map((columns, i) => (
+                  <div key={i}>
+                    {columns.map((hour, j) => (
+                      <div key={j} className="flex gap-2 border-t py-2">
+                        <div className="text-xs font-medium">{hour}h</div>
+                        <div className="w-full">
+                          <ListOfActions
+                            categories={categories}
+                            priorities={priorities}
+                            states={states}
+                            actions={todayActions.filter(
+                              (action) =>
+                                new Date(action.date).getHours() === hour
+                            )}
+                            clients={clients}
+                            columns={1}
+                            date={{
+                              dateFormat: 0,
+                              timeFormat: 1,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
-            </div>
+            )}
           </div>
         ) : (
           <div className="grid place-content-center p-8 text-xl">
