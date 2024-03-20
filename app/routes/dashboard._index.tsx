@@ -259,6 +259,7 @@ export default function DashboardIndex() {
                               (action) =>
                                 new Date(action.date).getHours() === hour
                             )}
+                            showCategory={true}
                             clients={clients}
                             columns={1}
                             date={{
