@@ -484,7 +484,7 @@ export function ListOfActions({
   clients?: Client[]
   showCategory?: boolean
   date?: { dateFormat?: 0 | 1 | 2 | 3 | 4; timeFormat?: 0 | 1 }
-  columns?: 1 | 2 | 3
+  columns?: 1 | 2 | 3 | 6
   onDrag?: (action: Action) => void
   isFoldable?: boolean
 }) {
@@ -494,21 +494,14 @@ export function ListOfActions({
     <>
       <div
         className={`min-h-full ${
-          columns === 2
-            ? "grid sm:grid-cols-2"
-            : columns === 3
-              ? "grid sm:grid-cols-2 md:grid-cols-3"
-              : "flex flex-col"
-        } grid-flow-col gap-x-4 gap-y-1 @container`}
-        style={
-          columns > 1
-            ? {
-                gridTemplateRows: `repeat(${Math.ceil(
-                  (actions?.slice(0, fold).length || columns) / columns
-                )}, minmax(0, 1fr))`,
-              }
-            : undefined
-        }
+          columns === 1
+            ? "flex flex-col"
+            : columns === 2
+              ? "grid sm:grid-cols-2"
+              : columns === 3
+                ? "grid sm:grid-cols-2 md:grid-cols-3"
+                : "grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4  2xl:grid-cols-6"
+        } gap-x-4 gap-y-1 @container`}
       >
         {actions
           ?.slice(0, fold)

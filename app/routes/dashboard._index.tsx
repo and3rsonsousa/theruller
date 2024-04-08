@@ -132,7 +132,7 @@ export default function DashboardIndex() {
   }, [draggedAction, submit])
 
   return (
-    <div className="container overflow-hidden">
+    <div className="overflow-hidden">
       <div className="scrollbars mt-16 px-4 md:px-8">
         <Progress
           className={"mt-4"}
@@ -160,7 +160,7 @@ export default function DashboardIndex() {
               states={states}
               actions={lateActions}
               showCategory={true}
-              columns={3}
+              columns={6}
               date={{ dateFormat: 1 }}
               clients={clients}
             />
@@ -247,29 +247,38 @@ export default function DashboardIndex() {
                   [18, 19, 20, 21, 22, 23],
                 ].map((columns, i) => (
                   <div key={i}>
-                    {columns.map((hour, j) => (
-                      <div key={j} className="flex gap-2 border-t py-2">
-                        <div className="text-xs font-medium">{hour}h</div>
-                        <div className="w-full">
-                          <ListOfActions
-                            categories={categories}
-                            priorities={priorities}
-                            states={states}
-                            actions={todayActions.filter(
-                              (action) =>
-                                new Date(action.date).getHours() === hour
-                            )}
-                            showCategory={true}
-                            clients={clients}
-                            columns={1}
-                            date={{
-                              dateFormat: 0,
-                              timeFormat: 1,
-                            }}
-                          />
+                    {columns.map((hour, j) => {
+                      const hourActions = todayActions.filter(
+                        (action) => new Date(action.date).getHours() === hour
+                      )
+                      return (
+                        <div
+                          key={j}
+                          className="flex min-h-10 gap-2 border-t py-2"
+                        >
+                          <div
+                            className={`text-xs font-medium ${hourActions.length === 0 ? "opacity-15" : ""}`}
+                          >
+                            {hour}h
+                          </div>
+                          <div className="w-full">
+                            <ListOfActions
+                              categories={categories}
+                              priorities={priorities}
+                              states={states}
+                              actions={hourActions}
+                              showCategory={true}
+                              clients={clients}
+                              columns={1}
+                              date={{
+                                dateFormat: 0,
+                                timeFormat: 1,
+                              }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 ))}
               </div>

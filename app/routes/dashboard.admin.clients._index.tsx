@@ -16,7 +16,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export default function AdminClients() {
   const { clients } = useLoaderData<typeof loader>()
   return (
-    <div className="container overflow-hidden">
+    <div className="overflow-hidden">
       <ScrollArea className="h-full w-full px-4 md:px-8">
         <div className="pt-16"></div>
         <div className="grid py-4 sm:grid-cols-2">

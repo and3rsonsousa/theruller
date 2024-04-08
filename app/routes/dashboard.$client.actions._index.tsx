@@ -30,7 +30,7 @@ export default function Actions() {
   const lateActions = getDelayedActions({ actions: actions as Action[] })
 
   return (
-    <div className="container overflow-hidden">
+    <div className="overflow-hidden">
       {lateActions?.length ? (
         <div className="mb-4">
           <div className="flex justify-between py-8">

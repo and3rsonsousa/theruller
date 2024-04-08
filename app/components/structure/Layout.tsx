@@ -6,7 +6,7 @@ import Search from "./Search"
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div
-      className="container relative mx-auto
+      className="relative
 		 flex h-[100dvh] flex-col font-light text-gray-300 antialiased md:overflow-hidden"
     >
       <Header />

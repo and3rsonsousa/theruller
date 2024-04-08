@@ -30,7 +30,7 @@ export default function Actions() {
   const instagramActions = getInstagramActions({ actions })
 
   return (
-    <div className="container flex gap-8 overflow-hidden">
+    <div className="flex gap-8 overflow-hidden">
       <div className="mt-2 w-1/2">
         <div className="mb-8">
           <div className="flex justify-between py-2">

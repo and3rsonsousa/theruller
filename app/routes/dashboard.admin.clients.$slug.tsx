@@ -67,7 +67,7 @@ export default function AdminClients() {
   const { people } = matches[1].data as DashboardDataType
 
   return (
-    <div className="container overflow-hidden">
+    <div className="overflow-hidden">
       <ScrollArea className="h-full w-full">
         <div className="pt-16"></div>
         <div className="px-4 md:px-8">
