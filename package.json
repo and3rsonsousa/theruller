@@ -4,10 +4,8 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "build": "vite build && vite build --ssr",
-    "dev": "vite dev",
-    "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "remix-serve ./build/server/index.js",
+    "build": "remix vite:build",
+    "dev": "remix vite:dev",
     "typecheck": "tsc",
     "gentypes": "npx supabase gen types typescript --project-id qmtklcseozqntgztgnoe --schema public > database.ts"
   },
@@ -71,7 +69,7 @@
   },
   "devDependencies": {
     "@remix-run/dev": "2.8.1",
-    "@resolid/remix-plugins": "2.1.2",
+    "@remix-run/eslint-config": "^2.8.1",
     "@types/react": "18.2.74",
     "@types/react-dom": "18.2.24",
     "@typescript-eslint/eslint-plugin": "7.5.0",
