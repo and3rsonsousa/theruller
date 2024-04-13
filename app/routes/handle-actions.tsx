@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, json } from "@remix-run/node"
+import { ActionFunctionArgs, json } from "@vercel/remix"
 import { format } from "date-fns"
 import { INTENTS, PRIORITIES } from "~/lib/constants"
 import { SupabaseServerClient } from "~/lib/supabase"

@@ -4,7 +4,7 @@ import {
   LoaderFunctionArgs,
   json,
   redirect,
-} from "@remix-run/node"
+} from "@vercel/remix"
 import { Form, Link, useLoaderData, useMatches } from "@remix-run/react"
 import invariant from "tiny-invariant"
 import { Button } from "~/components/ui/Spectrum"

@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/no-autofocus */
-import { ActionFunctionArgs, redirect } from "@remix-run/node"
+import { ActionFunctionArgs, redirect } from "@vercel/remix"
 import { Form, useMatches } from "@remix-run/react"
 import { Button } from "~/components/ui/Spectrum"
 import { Checkbox } from "~/components/ui/ui/checkbox"

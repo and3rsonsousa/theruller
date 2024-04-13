@@ -1,9 +1,4 @@
-import {
-  LoaderFunctionArgs,
-  MetaFunction,
-  json,
-  redirect,
-} from "@remix-run/node"
+import { LoaderFunctionArgs, MetaFunction, json, redirect } from "@vercel/remix"
 import { Link, Outlet, useLoaderData, useMatches } from "@remix-run/react"
 import { CalendarDaysIcon, Grid3X3Icon, ListTodoIcon } from "lucide-react"
 import Progress from "~/components/structure/Progress"

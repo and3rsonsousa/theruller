@@ -8,7 +8,7 @@ import {
   useLoaderData,
 } from "@remix-run/react"
 
-import { json } from "@remix-run/node"
+import { json } from "@vercel/remix"
 import "./index.css"
 import { createBrowserClient } from "@supabase/ssr"
 

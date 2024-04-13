@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, redirect } from "@remix-run/node"
+import { ActionFunctionArgs, redirect } from "@vercel/remix"
 import { useActionData } from "@remix-run/react"
 import { AlertCircleIcon, LogInIcon } from "lucide-react"
 import { Button } from "~/components/ui/ui/button"

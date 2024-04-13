@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs, json } from "@remix-run/node"
+import { LoaderFunctionArgs, json } from "@vercel/remix"
 import { Form, Link, useLoaderData } from "@remix-run/react"
 import { Trash2Icon } from "lucide-react"
 import { ScrollArea } from "~/components/ui/ui/scroll-area"

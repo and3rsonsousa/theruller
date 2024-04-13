@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs } from "@remix-run/node"
+import { LoaderFunctionArgs } from "@vercel/remix"
 import { useLoaderData, useMatches } from "@remix-run/react"
 import { GridOfActions, ListOfActions } from "~/components/structure/Action"
 import { getInstagramActions } from "~/lib/helpers"

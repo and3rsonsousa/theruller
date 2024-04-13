@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs, json, redirect } from "@remix-run/node"
+import { LoaderFunctionArgs, json, redirect } from "@vercel/remix"
 import { Outlet } from "@remix-run/react"
 import Layout from "~/components/structure/Layout"
 import { SupabaseServerClient } from "~/lib/supabase"

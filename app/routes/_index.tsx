@@ -1,4 +1,4 @@
-import type { MetaFunction } from "@remix-run/node"
+import type { MetaFunction } from "@vercel/remix"
 
 import { LogInIcon } from "lucide-react"
 import { SpectrumLink } from "~/components/ui/Spectrum"
