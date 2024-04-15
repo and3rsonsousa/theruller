@@ -192,7 +192,10 @@ export default function Client() {
 
   return (
     <div className="relative flex flex-col overflow-y-hidden">
-      <div id="daysheader" className=" z-10 bg-background/25 backdrop-blur-lg">
+      <div
+        id="daysheader"
+        className="z-10 w-full bg-background/25 backdrop-blur-lg"
+      >
         <div className="flex items-center justify-between py-2">
           <div className="flex items-center gap-1 text-xl font-semibold ">
             <div className="mr-4">
