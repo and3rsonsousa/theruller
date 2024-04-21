@@ -1,5 +1,4 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import { LoaderFunctionArgs, json } from "@vercel/remix"
 import {
   Form,
   Link,
@@ -8,6 +7,7 @@ import {
   useSearchParams,
   useSubmit,
 } from "@remix-run/react"
+import { LoaderFunctionArgs, json } from "@vercel/remix"
 import {
   addMonths,
   eachDayOfInterval,
@@ -26,14 +26,7 @@ import {
   subMonths,
 } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import {
-  AlignJustifyIcon,
-  CalendarClockIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  PlusIcon,
-  TimerIcon,
-} from "lucide-react"
+import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from "lucide-react"
 import React, { useEffect, useState } from "react"
 import invariant from "tiny-invariant"
 import { ActionLine } from "~/components/structure/Action"
@@ -53,7 +46,6 @@ import {
   usePendingActions,
 } from "~/lib/helpers"
 import { SupabaseServerClient } from "~/lib/supabase"
-import { Toggle } from "@radix-ui/react-toggle"
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   let date = new URL(request.url).searchParams.get("date")
